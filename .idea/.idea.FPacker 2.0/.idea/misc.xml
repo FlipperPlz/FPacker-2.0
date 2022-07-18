@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ANTLRGenerationPreferences">
+    <option name="perGrammarGenerationSettings">
+      <list>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/FPacker 2.0/Antlr/Poseidon/Poseidon.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="C:\Users\dev\Desktop\FPacker 2.0\FPacker 2.0\Antlr\Poseidon" />
+          <option name="libDir" value="" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="" />
+          <option name="language" value="CSharp" />
+        </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/FPacker 2.0/Antlr/Enforce/EnforceLexer.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="C:\Users\dev\Desktop\FPacker 2.0\FPacker 2.0\Antlr\Enforce" />
+          <option name="libDir" value="" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="" />
+          <option name="language" value="CSharp" />
+        </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/FPacker 2.0/Antlr/Enforce/EnforceParser.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="C:\Users\dev\Desktop\FPacker 2.0\FPacker 2.0\Antlr\Enforce" />
+          <option name="libDir" value="C:\Users\dev\Desktop\FPacker 2.0\FPacker 2.0\Antlr\Enforce" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="" />
+          <option name="language" value="CSharp" />
+        </PerGrammarGenerationSettings>
+      </list>
+    </option>
+  </component>
+</project>

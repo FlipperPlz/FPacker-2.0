@@ -1,0 +1,16 @@
+﻿namespace FPacker.P3D.Math; 
+
+[Flags]
+public enum FaceFlags
+{
+    DEFAULT = 0,
+    SHADOW_OFF = 16,
+    MERGING_OFF = 16777216,
+    ZBIAS_LOW = 256,
+    ZBIAS_MID = 512,
+    ZBIAS_HIGH = 768,
+    LIGHTNING_BOTH = 32,
+    LIGHTNING_POSITION = 128,
+    LIGHTNING_FLAT = 2097152,
+    LIGHTNING_REVERSED = 1048576
+}
