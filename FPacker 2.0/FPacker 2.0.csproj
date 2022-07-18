@@ -17,7 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Formats\Enforce\Parse" />
       <Folder Include="Formats\RAP\Parse" />
     </ItemGroup>
 
