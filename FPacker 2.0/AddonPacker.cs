@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using FPacker.Formats.CPP.Models;
+using FPacker.Formats.Enforce.Models;
 using FPacker.Formats.RAP.Models;
 using FPacker.Formats.RVMAT.Models;
 using FPacker.P3D.Models;
@@ -51,11 +52,16 @@ internal class AddonPacker {
     private readonly List<string> foundPaths = new();
     private readonly List<string> _foundRvMatPaths = new();
     private readonly List<string> _foundModelPaths = new();
+    private readonly List<string> _foundSamplePaths = new();
 
-    
+
+    private readonly List<EnforceFile> _scripts = new();
     private readonly List<ConfigFile> _configs = new();
     private readonly List<RVMatFile> _materials = new();
+    private readonly List<AddonFile> _samples = new();
+
     private readonly List<P3DFile> _models = new();
+    
 
 
     public AddonPacker(string sourceFolder, string outPath) {
@@ -78,10 +84,70 @@ internal class AddonPacker {
                 if(!foundPaths.Contains(rvmatPath)) foundPaths.Add(rvmatPath);
                 if(!_foundRvMatPaths.Contains(rvmatPath)) _foundRvMatPaths.Add(rvmatPath);
             }
-            foreach (var samplePath in cfg.SoundSamplePaths.Where(samplePath => !foundPaths.Contains(samplePath))) foundPaths.Add(samplePath);
+            foreach (var samplePath in cfg.SoundSamplePaths.Where(samplePath => !_foundSamplePaths.Contains(samplePath))) _foundSamplePaths.Add(samplePath);
         }
         
+
+        foreach (var cfg in _configs) {
+            var locScriptList = new Dictionary<int, List<string>>();
+            locScriptList.Add(5, cfg.MissionScriptPaths);
+            locScriptList.Add(4, cfg.WorldScriptPaths);
+            locScriptList.Add(3, cfg.GameScriptPaths);
+            locScriptList.Add(2, cfg.GameLibScriptPaths);
+            locScriptList.Add(1, cfg.EngineScriptPaths);
+            foreach (var (moduleNum,scriptPaths) in locScriptList) {
+                foreach (var scriptPath in scriptPaths) {
+                    var pboRefPath = SanitizePBOPath(scriptPath);
+                    var systemPath = ConvertPBORefPath2SystemPath(pboRefPath);
+                    var pboPath = ConvertPBORefPath2PBOPath(pboRefPath);
+
+                    if(systemPath is null) continue;
+                    if (File.Exists(systemPath)) {
+                        Logger.Info("Parsing Enforce file: {sysPath}", systemPath);
+                        if (!_obfuscatedPaths.TryGetValue(pboRefPath, out var obfuscatedPBORefPath)) {
+                            obfuscatedPBORefPath = DeterminePrefixFromPath(pboRefPath).PrefixName + Path.DirectorySeparatorChar + PBOUtilities.RandomString(25, includeSpaces: true, includeNumbers: false) +
+                                                   '.' + pboRefPath.Split('.').Last();
+                        }
+                        if(obfuscatedPBORefPath is null) Console.Write("fuck");
+                        
+                        var foundScript = new EnforceFile(pboPath, pboRefPath, systemPath) {
+                            Modules = new List<int> {moduleNum}, 
+                            ObfuscatedPBOPath = ConvertPBORefPath2PBOPath(obfuscatedPBORefPath), 
+                            ObfuscatedPBORefPath = obfuscatedPBORefPath
+                        };
+                        _scripts.Add(foundScript);
+                        cfg.ReferencedScripts.Add(foundScript);
+                    } else if (Directory.Exists(systemPath)) {
+                        foreach (var cFile in new DirectoryInfo(systemPath).EnumerateFiles("*.c", SearchOption.AllDirectories)) {
+                            var childPboRefPath = pboRefPath + Path.DirectorySeparatorChar + PBOUtilities.GetRelativePath(systemPath, cFile.FullName);
+                            var childPboPath = ConvertPBORefPath2PBOPath(childPboRefPath);
+                            var childSystemPath = cFile.FullName;
+                            if (!_obfuscatedPaths.TryGetValue(pboRefPath, out var obfuscatedPBORefPath)) {
+                                obfuscatedPBORefPath = DeterminePrefixFromPath(childPboRefPath).PrefixName + Path.DirectorySeparatorChar + PBOUtilities.RandomString(25, includeSpaces: true, includeNumbers: false) + ".c";
+                            }
+                            Logger.Info("Parsing Enforce file: {childSystemPath}", systemPath);
+
+                            var foundScript = new EnforceFile(childPboPath, childPboRefPath, childSystemPath) {
+                                Modules = new List<int> {moduleNum},
+                                ObfuscatedPBOPath = ConvertPBORefPath2PBOPath(obfuscatedPBORefPath),
+                                ObfuscatedPBORefPath = obfuscatedPBORefPath
+                            };
+                            _scripts.Add(foundScript);
+                            cfg.ReferencedScripts.Add(foundScript);
+                        }
+                    }
+                    else {
+                        throw new Exception("The system path was not found");
+                    }
+                }
+            }
+        }
+
+        foreach (var script in _scripts) {
+        }
+
         #endregion
+       
 
         foreach (var modelPath in _foundModelPaths) {
             var pboRefPath = SanitizePBOPath(modelPath);
@@ -111,6 +177,24 @@ internal class AddonPacker {
             foundPaths.AddRange(rvmat.TexturePaths);
         }
 
+        foreach (var samplePath in _foundSamplePaths) {
+            var sanitizedRefPath = SanitizePBOPath(samplePath);
+            var systemPath = ConvertPBORefPath2SystemPath(sanitizedRefPath);
+            if(systemPath is null || !File.Exists(systemPath)) continue;
+            Logger.Debug("Located system path for {pboref}", sanitizedRefPath);
+            if (!_obfuscatedPaths.TryGetValue(sanitizedRefPath, out var obfuscatedPBORefPath)) {
+                obfuscatedPBORefPath = DeterminePrefixFromPath(sanitizedRefPath).PrefixName + Path.DirectorySeparatorChar + PBOUtilities.RandomString(25, includeSpaces: true, includeNumbers: false) +
+                                       '.' + sanitizedRefPath.Split('.').Last();
+            }
+            _samples.Add(new AddonFile() {
+                PBOObfuscatedPath = ConvertPBORefPath2PBOPath(obfuscatedPBORefPath),
+                PBOObfuscatedRefPath = obfuscatedPBORefPath,
+                PBOPath = ConvertPBORefPath2PBOPath(sanitizedRefPath),
+                PBOReferencePath = sanitizedRefPath,
+                SystemPath = systemPath
+            });
+        }
+
         foreach (var foundPath in foundPaths) {
             var sanitizedRefPath = SanitizePBOPath(foundPath);
             var systemPath = ConvertPBORefPath2SystemPath(sanitizedRefPath);
@@ -120,15 +204,17 @@ internal class AddonPacker {
                 obfuscatedPBORefPath = DeterminePrefixFromPath(sanitizedRefPath).PrefixName + Path.DirectorySeparatorChar + PBOUtilities.RandomString(25, includeSpaces: true, includeNumbers: false) +
                     '.' + sanitizedRefPath.Split('.').Last();
             }
+            
             _obfuscatedPaths.TryAdd(sanitizedRefPath, obfuscatedPBORefPath);
 
              _obfuscatedPaths.TryAdd(foundPath, obfuscatedPBORefPath);
             obfuscatedPBORefPath = string.Empty;
         }
+        
 
         foreach (var p3DFile in _models) {
             foreach (var proxyPath in p3DFile.ProxyPaths) {
-                if(_obfuscatedPaths.ContainsKey(proxyPath) || proxyPath.ToLower().StartsWith("dz")) continue;
+                if(proxyPath.ToLower().StartsWith("dz")) continue;
                 var sanitizedRefPath = SanitizePBOPath(Path.ChangeExtension(proxyPath, ".p3d"));
                 var proxySysPath = ConvertPBORefPath2SystemPath(sanitizedRefPath);
                 if(proxySysPath is null || !File.Exists(proxySysPath)) continue;
@@ -168,15 +254,40 @@ internal class AddonPacker {
         var entries = new List<PBOEntry>();
         entries.AddRange(_materials.Select(static materialFile => new PBOEntry(materialFile.ObfuscatedPBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.RVMAT, Encoding.UTF8.GetBytes(materialFile.RVMatData.ToRapFormat()), materialFile.SystemPath)));
         entries.AddRange(_configs.Select(static configFile => new PBOEntry(configFile.PBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.PoseidonConfig, Encoding.UTF8.GetBytes(configFile.PoseidonConfig.ToRapFormat()), configFile.SystemPath)));
+        foreach (var sampleFile in _samples) {
+            entries.Add(new PBOEntry(sampleFile.PBOObfuscatedPath, (int) EntryPackingType.Uncompressed, EntryDataType.Audio, File.ReadAllBytes(sampleFile.SystemPath)));
+        }
         foreach (var model in _models) {
-            if (model.P3DData is ODOL odol) {
-                //TODO: Write ODOL
-                entries.Add(new PBOEntry(model.PBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.Model, FormatConversion.Covert2MLOD(odol).WriteToMemory().ToArray()));
-            } else if (model.P3DData is MLOD mlod) {
-                entries.Add(new PBOEntry(model.PBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.Model, mlod.WriteToMemory().ToArray()));
-
+            switch (model.P3DData) {
+                case ODOL odol:
+                    //TODO: Write ODOL
+                    entries.Add(new PBOEntry(model.PBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.Model, FormatConversion.Covert2MLOD(odol).WriteToMemory().ToArray()));
+                    break;
+                case MLOD mlod:
+                    entries.Add(new PBOEntry(model.PBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.Model, mlod.WriteToMemory().ToArray()));
+                    break;
             }
         }
+
+        foreach (var model in _models) {
+            foreach (var proxyPath in model.ProxyPaths) {
+                Console.WriteLine(proxyPath);
+                if(proxyPath.ToLower().StartsWith("dz")) continue;
+                var sanitizedRefPath = SanitizePBOPath(Path.ChangeExtension(proxyPath, ".p3d"));
+                var proxySysPath = ConvertPBORefPath2SystemPath(sanitizedRefPath);
+                if(proxySysPath is null || !File.Exists(proxySysPath)) continue;
+                if (!_obfuscatedPaths.TryGetValue(sanitizedRefPath, out var obfuscatedPBORefPath)) {
+                    obfuscatedPBORefPath = DeterminePrefixFromPath(sanitizedRefPath).PrefixName + Path.DirectorySeparatorChar + PBOUtilities.RandomString(25, includeSpaces: true, includeNumbers: false) +
+                                           '.' + sanitizedRefPath.Split('.').Last();
+                }
+                
+                entries.Add(new PBOEntry(ConvertPBORefPath2PBOPath(sanitizedRefPath), (int) EntryPackingType.Compressed,
+                    EntryDataType.Obfuscated, Encoding.UTF8.GetBytes($"#include \"{obfuscatedPBORefPath}\"")));
+            } 
+        }
+
+
+        //entries.AddRange(_scripts.Select(static script => new PBOEntry(script.ObfuscatedPBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.EnforceScript, File.ReadAllBytes(script.SystemPath))));
 
         Logger.Info("Starting packing process for {n} files", entries.Count);
         new PBOStream(File.Create(outPath)).WritePBO(entries);
@@ -346,7 +457,7 @@ internal static class PBOUtilities {
         if (IsNullOrEmpty(allowableChars)) allowableChars = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
         if (includeNumbers) allowableChars += "0123456789";
-        if (!includeSpaces) allowableChars += "      \t\t\n";
+        if (includeSpaces) allowableChars += " ";
 
         
         var rnd = new byte[stringLength];

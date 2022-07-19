@@ -11,7 +11,7 @@ using FPacker.Antlr.Enforce;
 
 namespace FPacker.Formats.Enforce.Models;
 
-public class EnforceScript : IEnforceDeserializable<EnforceParser.ComputationalUnitContext, EnforceScript>, IEnforceSerializable {
+public class EnforceScript : IEnforceDeserializable<EnforceParser.ComputationalUnitContext, EnforceScript> {
     public List<EnforceVariable> GlobalFields { get; set; }
     public List<EnforceFunction> GlobalFunctions { get; set; }
     public List<EnforceClass> Classes { get; set; }

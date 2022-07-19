@@ -2,6 +2,7 @@
 using Antlr4.Runtime.Tree;
 using FPacker.Antlr.Poseidon;
 using FPacker.Formats.CPP.Parse;
+using FPacker.Formats.Enforce.Models;
 using FPacker.Formats.RAP.Models;
 
 namespace FPacker.Formats.CPP.Models; 
@@ -19,7 +20,19 @@ class ConfigFile {
     public List<string> MaterialPaths { get; private set; }
     public List<string> SoundSamplePaths { get; private set; }
 
+    
+    public List<string> EngineScriptPaths = new();
+    public List<string> GameLibScriptPaths = new();
+    public List<string> GameScriptPaths = new();
+    public List<string> WorldScriptPaths = new();
+    public List<string> MissionScriptPaths = new();
+    
     public List<string> FoundPaths = new();
+    
+    public List<EnforceFile> ReferencedScripts = new();
+
+
+
     public Dictionary<string, string> ObfuscatedPaths { get; private set; } = new();
 
 
@@ -47,6 +60,13 @@ class ConfigFile {
         TexturePaths = listener.TexturePaths;
         MaterialPaths = listener.MaterialPaths;
         SoundSamplePaths = listener.SoundSamplePaths;
+        
+        EngineScriptPaths = listener.EngineScriptPaths;
+        GameLibScriptPaths = listener.GameLibScriptPaths;
+        GameScriptPaths = listener.GameScriptPaths;
+        WorldScriptPaths = listener.WorldScriptPaths;
+        MissionScriptPaths = listener.MissionScriptPaths;
+
         FoundPaths.AddRange(ModelPaths);
         FoundPaths.AddRange(TexturePaths);
         FoundPaths.AddRange(MaterialPaths);
@@ -62,7 +82,7 @@ class ConfigFile {
         var tokens = new CommonTokenStream(lexer);
         var parser = new PoseidonParser(tokens);
         var rewriter = new TokenStreamRewriter(tokens);
-        var listener = new ConfigObfuscationListener() { Rewriter = rewriter, ObfuscatedPaths = ObfuscatedPaths };
+        var listener = new ConfigObfuscationListener() { Rewriter = rewriter, ObfuscatedPaths = ObfuscatedPaths, EnforceFiles = ReferencedScripts};
         new ParseTreeWalker().Walk(listener, parser.computationalUnit());
         
         ResetData(rewriter.GetText());
@@ -70,7 +90,10 @@ class ConfigFile {
     
     private void ResetData(string getText) {
         var lexer = new PoseidonLexer(CharStreams.fromString(getText));
-        var parser = new PoseidonParser(new CommonTokenStream(lexer));
+        var tokens = new CommonTokenStream(lexer);
+
+        var parser = new PoseidonParser(tokens);
+
         var listener = new ConfigPreParser();
         new ParseTreeWalker().Walk(listener, parser.computationalUnit());
         PoseidonConfig = listener.ConfigFile;

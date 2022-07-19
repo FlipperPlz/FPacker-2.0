@@ -12,7 +12,7 @@ using FPacker.Antlr.Enforce;
 
 namespace FPacker.Formats.Enforce.Models; 
 
-public class EnforceVariable : EnforceDeserializable<EnforceParser.FieldDeclarationContext, EnforceVariable>, EnforceSerializable {
+public class EnforceVariable : IEnforceDeserializable<EnforceParser.FieldDeclarationContext, EnforceVariable>, IEnforceSerializable {
     public List<string> VariableModifiers { get; set; }
     public string VariableType { get; set; }
     public Dictionary<string, string> DefinedVariables { get; set; }

@@ -13,7 +13,7 @@ using FPacker.Antlr.Enforce;
 namespace FPacker.Formats.Enforce.Models; 
 
 //TODO: Type Support
-public class EnforceClass : EnforceDeserializable<EnforceParser.ClassDeclarationContext, EnforceClass>, EnforceSerializable {
+public class EnforceClass : IEnforceDeserializable<EnforceParser.ClassDeclarationContext, EnforceClass>, IEnforceSerializable {
     public bool ModdedClass { get; set; }
     public string ClassName { get; set; }
     public string? ParentClass { get; set; }

@@ -12,7 +12,7 @@ using FPacker.Antlr.Enforce;
 
 namespace FPacker.Formats.Enforce.Models; 
 
-public class EnforceFunction : EnforceDeserializable<EnforceParser.MethodDeclarationContext, EnforceFunction>, EnforceSerializable {
+public class EnforceFunction : IEnforceDeserializable<EnforceParser.MethodDeclarationContext, EnforceFunction> {
     public List<string> FunctionModifiers { get; set; }
     public string FunctionType { get; set; }
     public string FunctionName { get; set; }

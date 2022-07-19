@@ -2,6 +2,6 @@
 
 namespace FPacker.Formats.Enforce; 
 
-public interface EnforceDeserializable<in Tctx, out Tself> where Tctx : ParserRuleContext where Tself : EnforceSerializable {
+public interface IEnforceDeserializable<in Tctx, out Tself> : IEnforceSerializable where Tctx : ParserRuleContext where Tself : IEnforceSerializable {
     public Tself FromEnforceContext(Tctx ctx);
 }
