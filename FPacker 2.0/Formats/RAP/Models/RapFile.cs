@@ -1,12 +1,13 @@
 ﻿using System.Text;
 using FPacker.Antlr.Poseidon;
+using FPacker.Formats.RAP.IO;
 
 namespace FPacker.Formats.RAP.Models; 
 
-public class RapFile : RapSerializable, RapDeserializable<PoseidonParser.ComputationalUnitContext, RapFile> {
-    public List<RapDeleteStatement> GlobalDeleteStatements { get; set; }
-    public List<RapVariableStatement> GlobalVariableStatements { get; set; }
-    public List<RapClass> GlobalClasses { get; set; }
+public class RapFile : IRapSerializable, IRapDeserializable<PoseidonParser.ComputationalUnitContext, RapFile>, IRapBinarizable<RapFile> {
+    public List<RapDeleteStatement> GlobalDeleteStatements { get; set; } = new();
+    public List<RapVariableStatement> GlobalVariableStatements { get; set; } = new();
+    public List<RapClass> GlobalClasses { get; set; } = new();
     
     public string ToRapFormat() {
         var builder = new StringBuilder();
@@ -36,5 +37,11 @@ public class RapFile : RapSerializable, RapDeserializable<PoseidonParser.Computa
         };
     }
 
+    public static RapFile FromBinaryFormat(RapBinaryReader reader) {
+        throw new NotImplementedException();
+        
+    }
+
     public RapFile FromRapContext(PoseidonParser.ComputationalUnitContext ctx) => FromRapFormat(ctx);
+    public RapFile FromBinaryContext(RapBinaryReader reader, bool defaultFalse) => FromBinaryFormat(reader);
 }

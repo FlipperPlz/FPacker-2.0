@@ -1,11 +1,15 @@
-﻿namespace FPacker.Formats.RAP.Models.Values; 
+﻿using FPacker.Formats.RAP.IO;
 
-public abstract class BaseRapValue<TCtx, VType> : RapSerializable {
+namespace FPacker.Formats.RAP.Models.Values; 
+
+
+public abstract class BaseRapValue<TCtx, VType> : IRapSerializable, IRapValue {
     public VType Value { get; set; }
     public abstract string ToRapFormat();
-    public abstract void FromRapFormat(TCtx ctx);
-    
+    public abstract void FromRapContext(TCtx ctx);
     protected BaseRapValue(VType value) => Value = value;
 
     protected BaseRapValue() { }
 }
+
+public interface IRapValue { };

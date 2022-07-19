@@ -1,36 +1,42 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Text;
 using FPacker.Antlr.Poseidon;
+using FPacker.Formats.RAP.IO;
+using FPacker.Formats.RAP.Models.Enums;
 
 namespace FPacker.Formats.RAP.Models.Values; 
 
-public class RapArray : BaseRapValue<PoseidonParser.ArrayInitializerContext, List<RapSerializable>> {
+public class RapArray : BaseRapValue<PoseidonParser.ArrayInitializerContext, List<IRapSerializable>> {
+    public int EntryCount;
+
+    public RapArray() => Value = new List<IRapSerializable>(); 
+
+    public RapArray(IEnumerable<string> strings) {
+        Value = new List<IRapSerializable>();
+        foreach (var str in strings) Value.Add(new RapString() {Value = str});
+    }
+
     public override string ToRapFormat() => new StringBuilder("{").Append(string.Join(',', Value.Select(static v => v.ToRapFormat()))).Append('}').ToString();
-    public override void FromRapFormat(PoseidonParser.ArrayInitializerContext ctx) {
-        Value = new List<RapSerializable>();
+
+    public static RapArray FromParseContext(PoseidonParser.ArrayInitializerContext ctx) {
+        var rArray = new RapArray();
         foreach (var val in ctx.variableInitializer()) {
             if (val.arrayInitializer() is { } childArr) {
-                Value.Add(RapArray.FromParseContext(childArr));
+                rArray.Value.Add(RapArray.FromParseContext(childArr));
                 continue;
             } else if(val.literal().literalFloat() is { } literalFloat ) {
-                Value.Add(RapFloat.FromParseContext(literalFloat));         
+                rArray.Value.Add(RapFloat.FromParseContext(literalFloat));         
                 continue;
             } else if(val.literal().literalInteger() is { } literalInteger ) {
-                Value.Add(RapInt.FromParseContext(literalInteger));         
+                rArray.Value.Add(RapInt.FromParseContext(literalInteger));         
                 continue;
             } else if(val.literal().literalString() is { } literalString) {
-                Value.Add(RapString.FromParseContext(literalString));         
+                rArray.Value.Add(RapString.FromParseContext(literalString));         
                 continue;
             } 
         }
-    }
-    
-    public static RapArray FromParseContext(PoseidonParser.ArrayInitializerContext ctx) {
-        var rArray = new RapArray();
-        rArray.FromRapFormat(ctx);
         return rArray;
     }
-
+    
     public List<RapString> FlattenToStrings(bool recursive = true) {
         var foundStrings = new List<RapString>();
         foreach (var value in Value) {
@@ -46,4 +52,6 @@ public class RapArray : BaseRapValue<PoseidonParser.ArrayInitializerContext, Lis
 
         return foundStrings;
     }
+    
+    public override void FromRapContext(PoseidonParser.ArrayInitializerContext ctx) => FromParseContext(ctx);
 }

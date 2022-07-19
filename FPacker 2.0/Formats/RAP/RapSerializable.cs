@@ -2,6 +2,6 @@
 
 namespace FPacker.Formats.RAP.Models; 
 
-public interface RapSerializable {
+public interface IRapSerializable {
     public string ToRapFormat();
 }

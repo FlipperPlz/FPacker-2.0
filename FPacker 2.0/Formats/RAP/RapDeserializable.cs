@@ -2,6 +2,6 @@
 
 namespace FPacker.Formats.RAP.Models; 
 
-public interface RapDeserializable<in Tctx, out Tself> where Tctx : ParserRuleContext where Tself : RapSerializable {
+public interface IRapDeserializable<in Tctx, out Tself> : IRapSerializable where Tctx : ParserRuleContext where Tself : IRapSerializable {
     public Tself FromRapContext(Tctx ctx);
 }
