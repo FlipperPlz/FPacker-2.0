@@ -1,22 +1,25 @@
 ﻿using System.Text;
 using FPacker.Antlr.Poseidon;
+using FPacker.Formats.RAP.IO;
 
 namespace FPacker.Formats.RAP.Models; 
 
-public class RapClass : RapSerializable, RapDeserializable<PoseidonParser.ClassDefinitionContext, RapClass> {
+public class RapClass : IRapSerializable, IRapDeserializable<PoseidonParser.ClassDefinitionContext, RapClass>, IRapBinarizable<RapClass> {
     public string ClassName { get; set; }
     public string? ParentClass { get; set; } = null;
-    public bool ExternalClass { get; set; } = false;
-    
-    public List<RapDeleteStatement> DeleteStatements { get; set; }
-    public List<RapVariableStatement> VariableStatements { get; set; }
-    public List<RapClass> ChildClasses { get; set; }
+    public bool ExternalClass { get; init; } = false;
+    public List<RapDeleteStatement> DeleteStatements { get; init; } = new();
+    public List<RapVariableStatement> VariableStatements { get; init; } = new();
+    public List<RapClass> ChildClasses { get; init; } = new();
 
+    public uint BinaryOffset { get; set; } 
+    public int EntryCount { get; set; } 
+    
     public string ToRapFormat() {
         var builder = new StringBuilder("class ").Append(ClassName);
         if (ParentClass is not null) builder.Append(" : ").Append(ParentClass);
         if (ExternalClass) return builder.Append(';').ToString();
-        builder.Append(" {");
+        builder.Append(" {\n");
         DeleteStatements.ForEach(gds => builder.Append(gds.ToRapFormat()).Append('\n'));
         VariableStatements.ForEach(gvs => builder.Append(gvs.ToRapFormat()).Append('\n'));
         ChildClasses.ForEach(cc => builder.Append(cc.ToRapFormat()).Append('\n'));
@@ -60,6 +63,18 @@ public class RapClass : RapSerializable, RapDeserializable<PoseidonParser.ClassD
             VariableStatements = variableStatements
         };
     }
+    
+    private static RapClass FromBinaryFormat(RapBinaryReader reader, bool externalClass) => externalClass 
+        ? new RapClass() {
+            ExternalClass = true,
+            ClassName = reader.ReadAsciiZ()
+        } 
+        : new RapClass {
+            ClassName = reader.ReadAsciiZ(),
+            BinaryOffset = reader.ReadUInt32()
+        };
+
 
     public RapClass FromRapContext(PoseidonParser.ClassDefinitionContext ctx) => FromRapFormat(ctx);
+    public RapClass FromBinaryContext(RapBinaryReader reader, bool externalClass) => FromBinaryFormat(reader, externalClass);
 }
