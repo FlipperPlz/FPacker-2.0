@@ -10,14 +10,14 @@ public class RVMatPreParser : PoseidonBaseListener {
     public List<string> TexturePaths = new();
 
     public override void ExitComputationalUnit(PoseidonParser.ComputationalUnitContext context) =>
-        RvmatFile = RapFile.FromRapFormat(context);
+        RvmatFile = new RapFile().FromRapContext<RapFile>(context);
 
     public override void EnterVariableAssignment(PoseidonParser.VariableAssignmentContext context) {
         var varName = context.variableDeclaratorId().identifier().GetText().ToLower();
         switch (varName) {
             case "texture":
                 if (context.variableInitializer().literal().literalString() is { } textPathStringCtx) {
-                    var texturePath = RapString.FromParseContext(textPathStringCtx).Value;
+                    var texturePath = new RapString().FromRapContext<RapString>(textPathStringCtx).Value;
                     if (!texturePath.StartsWith('#') && !TexturePaths.Contains(texturePath)) TexturePaths.Add(texturePath);
                 }
                 break;

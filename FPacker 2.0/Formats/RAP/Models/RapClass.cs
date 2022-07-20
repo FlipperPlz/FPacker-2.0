@@ -1,13 +1,14 @@
 ﻿using System.Text;
+using Antlr4.Runtime;
 using FPacker.Antlr.Poseidon;
 using FPacker.Formats.RAP.IO;
 
 namespace FPacker.Formats.RAP.Models; 
 
-public class RapClass : IRapSerializable, IRapDeserializable<PoseidonParser.ClassDefinitionContext, RapClass>, IRapBinarizable<RapClass> {
+public class RapClass : IRapEntry {
     public string ClassName { get; set; }
     public string? ParentClass { get; set; } = null;
-    public bool ExternalClass { get; init; } = false;
+    public bool ExternalClass { get; set; } = false;
     public List<RapDeleteStatement> DeleteStatements { get; init; } = new();
     public List<RapVariableStatement> VariableStatements { get; init; } = new();
     public List<RapClass> ChildClasses { get; init; } = new();
@@ -26,55 +27,44 @@ public class RapClass : IRapSerializable, IRapDeserializable<PoseidonParser.Clas
         return builder.Append('}').Append(';').ToString();
     }
 
-    public static RapClass FromRapFormat(PoseidonParser.ClassDefinitionContext ctx) {
-        var className = ctx.identifier().GetText();
-        string? classExtension = null;
+    public void ToBinaryContext(RapBinaryWriter writer) {
+        throw new NotImplementedException();
+    }
+
+    public Tself FromRapContext<Tself>(ParserRuleContext context) where Tself : IRapDeserializable {
+        if (context is not PoseidonParser.ClassDefinitionContext ctx) throw new Exception();
+        ClassName = ctx.identifier().GetText();
+        ParentClass = null;
 
         if (ctx.classExtension() is { } classExtensionCtx) {
             if (classExtensionCtx.identifier() is { } classExtensionIdentifier) {
-                classExtension = classExtensionIdentifier.GetText();
+                ParentClass = classExtensionIdentifier.GetText();
             }
         }
 
         if (ctx.classBlock() is not { } classBlock) {
-            return new RapClass {
-                ClassName = className,
-                ParentClass = classExtension,
-                ExternalClass = true
-            };
+            ExternalClass = true;
+            return (Tself) (IRapEntry) this;
         }
 
-        var deleteStatements = new List<RapDeleteStatement>();
-        var variableStatements = new List<RapVariableStatement>();
 
         foreach (var statement in classBlock.statement()) {
             if (statement.variableAssignment() is { } variableAssignmentContext) 
-                variableStatements.Add(RapVariableStatement.FromRapFormat(variableAssignmentContext));
+                VariableStatements.Add(new RapVariableStatement().FromRapContext<RapVariableStatement>(variableAssignmentContext));
             if (statement.deleteStatement() is { } deleteStatementContext) 
-                deleteStatements.Add(RapDeleteStatement.FromRapFormat(deleteStatementContext));
+                DeleteStatements.Add(new RapDeleteStatement().FromRapContext<RapDeleteStatement>(deleteStatementContext));
         }
 
-        return new RapClass() {
-            ClassName = className,
-            ParentClass = classExtension,
-            ExternalClass = false,
-            ChildClasses = classBlock.classDefinition().Select(static classDefCtx => FromRapFormat(classDefCtx)).ToList(),
-            DeleteStatements = deleteStatements,
-            VariableStatements = variableStatements
-        };
+        ChildClasses.AddRange(classBlock.classDefinition().Select(static classDefCtx => new RapClass().FromRapContext<RapClass>(classDefCtx)));
+        ExternalClass = false;
+
+        return (Tself) (IRapEntry) this;
     }
-    
-    private static RapClass FromBinaryFormat(RapBinaryReader reader, bool externalClass) => externalClass 
-        ? new RapClass() {
-            ExternalClass = true,
-            ClassName = reader.ReadAsciiZ()
-        } 
-        : new RapClass {
-            ClassName = reader.ReadAsciiZ(),
-            BinaryOffset = reader.ReadUInt32()
-        };
 
-
-    public RapClass FromRapContext(PoseidonParser.ClassDefinitionContext ctx) => FromRapFormat(ctx);
-    public RapClass FromBinaryContext(RapBinaryReader reader, bool externalClass) => FromBinaryFormat(reader, externalClass);
+    public Tself FromBinaryContext<Tself>(RapBinaryReader reader, bool externalClass = false) where Tself : IRapDeserializable {
+        ExternalClass = externalClass;
+        ClassName = reader.ReadAsciiZ();
+        if (!ExternalClass) BinaryOffset = reader.ReadUInt32();
+        return (Tself) (IRapEntry) this;
+    }
 }

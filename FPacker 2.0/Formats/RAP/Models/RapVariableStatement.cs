@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Antlr4.Runtime;
 using FPacker.Antlr.Poseidon;
 using FPacker.Formats.RAP.IO;
 using FPacker.Formats.RAP.Models.Enums;
@@ -6,7 +7,7 @@ using FPacker.Formats.RAP.Models.Values;
 
 namespace FPacker.Formats.RAP.Models;
 
-public class RapVariableStatement : IRapDeserializable<PoseidonParser.VariableAssignmentContext, RapVariableStatement>, IRapBinarizable<RapVariableStatement> {
+public class RapVariableStatement : IRapEntry {
     public string VariableName { get; set; }
     public RapValueType VariableType { get; private set; }
     public IRapSerializable VariableValue { get; set; }
@@ -17,78 +18,57 @@ public class RapVariableStatement : IRapDeserializable<PoseidonParser.VariableAs
         return builder.Append(" = ").Append(VariableValue.ToRapFormat()).Append(';').ToString();
     }
 
-    public static RapVariableStatement FromRapFormat(PoseidonParser.VariableAssignmentContext ctx) {
+    public void ToBinaryContext(RapBinaryWriter writer) {
+        throw new NotImplementedException();
+    }
+
+    public Tself FromRapContext<Tself>(ParserRuleContext context) where Tself : IRapDeserializable {
+        if (context is not PoseidonParser.VariableAssignmentContext ctx) throw new Exception();
         if (ctx.variableInitializer().arrayInitializer() is { } arrayInitializer) {
-            return new RapVariableStatement {
-                VariableName = ctx.variableDeclaratorId().identifier().GetText(),
-                VariableValue = RapArray.FromParseContext(arrayInitializer)
-            };
+            VariableName = ctx.variableDeclaratorId().identifier().GetText();
+            VariableValue = new RapArray().FromRapContext<RapArray>(arrayInitializer);
+            return (Tself) (IRapEntry) this;
         }
         if (ctx.variableInitializer().literal().literalFloat() is { } floatContext) {
-            return new RapVariableStatement {
-                VariableName = ctx.variableDeclaratorId().identifier().GetText(),
-                VariableValue = RapFloat.FromParseContext(floatContext)
-            };
+            VariableName = ctx.variableDeclaratorId().identifier().GetText();
+            VariableValue = new RapFloat().FromRapContext<RapFloat>(floatContext);
+            return (Tself) (IRapEntry) this;
         }
-
         if (ctx.variableInitializer().literal().literalInteger() is { } integerContext) {
-            return new RapVariableStatement {
-                VariableName = ctx.variableDeclaratorId().identifier().GetText(),
-                VariableValue = RapInt.FromParseContext(integerContext)
-            };
+            VariableName = ctx.variableDeclaratorId().identifier().GetText();
+            VariableValue = new RapInt().FromRapContext<RapInt>(integerContext);
+            return (Tself) (IRapEntry) this;
         }
         
         if (ctx.variableInitializer().literal().literalString() is { } stringContext) {
-            return new RapVariableStatement {
-                VariableName = ctx.variableDeclaratorId().identifier().GetText(),
-                VariableValue = RapString.FromParseContext(stringContext)
-            };
+            VariableName = ctx.variableDeclaratorId().identifier().GetText();
+            VariableValue = new RapString().FromRapContext<RapString>(stringContext);
+            return (Tself) (IRapEntry) this;
         }
 
         throw new Exception($"No value was found for, {ctx.variableDeclaratorId().identifier().GetText()}");
     }
-    public static RapVariableStatement FromBinaryFormat(RapBinaryReader reader, bool isArray) {
-        if (isArray) {
-            return new RapVariableStatement() {
-                VariableType = RapValueType.Array,
-                VariableName = reader.ReadAsciiZ(),
-                VariableValue = reader.ReadRapArray()
-            };
-        }
 
-        var output = new RapVariableStatement() {
-            VariableType = (RapValueType) reader.ReadByte(),
-            VariableName = reader.ReadAsciiZ(),
-            VariableValue = reader.ReadRapArray()
-        };
-        
-        return output;
-    }
-    
-    
-
-    public RapVariableStatement FromRapContext(PoseidonParser.VariableAssignmentContext ctx) => FromRapFormat(ctx);
-
-    public RapVariableStatement FromBinaryContext(RapBinaryReader reader, bool isArray) {
+    public Tself FromBinaryContext<Tself>(RapBinaryReader reader, bool isArray = false) where Tself : IRapDeserializable {
         if (isArray) {
             VariableType = RapValueType.Array;
             VariableName = reader.ReadAsciiZ();
-            VariableValue = reader.ReadRapArray();
-            return this;
+            VariableValue = reader.ReadBinarizedValue<RapArray>();
+            return (Tself) (IRapEntry) this;
         }
 
         VariableType = (RapValueType) reader.ReadByte();
         VariableName = reader.ReadAsciiZ();
         
         IRapSerializable value = VariableType switch {
-            RapValueType.String => reader.ReadRapString(),
+            RapValueType.String => reader.ReadBinarizedValue<RapString>(),
             RapValueType.Variable => throw new Exception("Variables not supported yet."),
-            RapValueType.Float => reader.ReadRapFloat(),
-            RapValueType.Long => reader.ReadRapInt(),
-            RapValueType.Array => reader.ReadRapArray(),
+            RapValueType.Float => reader.ReadBinarizedValue<RapFloat>(),
+            RapValueType.Long => reader.ReadBinarizedValue<RapInt>(),
+            RapValueType.Array => reader.ReadBinarizedValue<RapArray>(),
             _ => throw new Exception("How did we get here?")
         };
         VariableValue = value;
-        return this;
+        return (Tself) (IRapEntry) this;
     }
 }

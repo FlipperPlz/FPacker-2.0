@@ -6,11 +6,6 @@
 //  * permission of Ryann
 //  *******************************************************/
 
-using FPacker.Formats.RAP.IO;
-
 namespace FPacker.Formats.RAP.Models; 
 
-public interface IRapBinarizable<out TSelf> {
-    public TSelf FromBinaryContext(RapBinaryReader reader, bool defaultFalse = false);
-    public IEnumerable<byte> ToBinaryContext() => throw new NotImplementedException();
-}
+public interface IRapEntry : IRapDeserializable { }

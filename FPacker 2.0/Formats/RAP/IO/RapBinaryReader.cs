@@ -35,42 +35,11 @@ public class RapBinaryReader : BinaryReader {
     }
     
     
-    //TODO:Move to BaseValueType
-    public RapString ReadRapString() => new(ReadAsciiZ());
-    public RapInt ReadRapInt() => new(ReadInt32());
-    public RapFloat ReadRapFloat() => new(ReadSingle());
-    public RapArray ReadRapArray() {
-        var output = new RapArray() {
-            EntryCount = ReadCompressedInteger()
-        };
-        if (output.EntryCount == 0) return output;
+    public TRapValue ReadBinarizedValue<TRapValue>() where TRapValue : class, IRapDeserializable, new() =>
+        new TRapValue().FromBinaryContext<TRapValue>(this);
 
-        for (var i = 0; i < output.EntryCount; ++i) {
-            switch ((RapValueType) ReadByte()) {
-                case RapValueType.String:
-                    output.Value.Add(ReadRapString());
-                    break;
-                case RapValueType.Float:
-                    output.Value.Add(ReadRapFloat());
-                    break;
-                case RapValueType.Long:
-                    output.Value.Add(ReadRapInt());
-                    break;
-                case RapValueType.Array:
-                    output.Value.Add(ReadRapArray());
-                    break;
-                case RapValueType.Variable: 
-                    output.Value.Add(ReadRapArray());
-                    break;
-                default: throw new Exception("How the fuck did you get here?");
-            }
-        }
-
-        return output;
-    }
-
-    public TRapEntry ReadBinarizedEntry<TRapEntry>(bool defaultFalse = false) where TRapEntry : class, IRapBinarizable<TRapEntry>, new() =>
-        new TRapEntry().FromBinaryContext(this, defaultFalse);
+    public TRapEntry ReadBinarizedEntry<TRapEntry>(bool defaultFalse = false) where TRapEntry : class, IRapDeserializable, new() =>
+        new TRapEntry().FromBinaryContext<TRapEntry>(this, defaultFalse);
     
     public bool ReadHeader() {
         var bits = ReadBytes(4);

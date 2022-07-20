@@ -1,10 +1,11 @@
 ﻿using System.Text;
+using Antlr4.Runtime;
 using FPacker.Antlr.Poseidon;
 using FPacker.Formats.RAP.IO;
 
 namespace FPacker.Formats.RAP.Models; 
 
-public class RapFile : IRapSerializable, IRapDeserializable<PoseidonParser.ComputationalUnitContext, RapFile>, IRapBinarizable<RapFile> {
+public class RapFile : IRapEntry {
     public List<RapDeleteStatement> GlobalDeleteStatements { get; set; } = new();
     public List<RapVariableStatement> GlobalVariableStatements { get; set; } = new();
     public List<RapClass> GlobalClasses { get; set; } = new();
@@ -17,31 +18,27 @@ public class RapFile : IRapSerializable, IRapDeserializable<PoseidonParser.Compu
         return builder.ToString();
     }
 
-    public static RapFile FromRapFormat(PoseidonParser.ComputationalUnitContext ctx) {
-        var deleteStatements = new List<RapDeleteStatement>();
-        var variableStatements = new List<RapVariableStatement>();
+    public void ToBinaryContext(RapBinaryWriter writer) {
+        throw new NotImplementedException();
+    }
+    
+    public Tself FromBinaryContext<Tself>(RapBinaryReader reader, bool defaultFalse = false) where Tself : IRapDeserializable {
+        throw new NotImplementedException();
+    }
+
+
+    public Tself FromRapContext<Tself>(ParserRuleContext context) where Tself : IRapDeserializable {
+        if (context is not PoseidonParser.ComputationalUnitContext ctx) throw new Exception();
 
         foreach (var statement in ctx.statement()) {
             if (statement.variableAssignment() is { } variableAssignmentContext) 
-                variableStatements.Add(RapVariableStatement.FromRapFormat(variableAssignmentContext));
+                GlobalVariableStatements.Add(new RapVariableStatement().FromRapContext<RapVariableStatement>(variableAssignmentContext));
             if (statement.deleteStatement() is { } deleteStatementContext) 
-                deleteStatements.Add(RapDeleteStatement.FromRapFormat(deleteStatementContext));
+                GlobalDeleteStatements.Add(new RapDeleteStatement().FromRapContext<RapDeleteStatement>(deleteStatementContext));
         }
 
-        var classes = ctx.classDefinition().Select(static classDefinitionContext => RapClass.FromRapFormat(classDefinitionContext)).ToList();
-
-        return new RapFile() {
-            GlobalDeleteStatements = deleteStatements,
-            GlobalVariableStatements = variableStatements,
-            GlobalClasses = classes
-        };
+        GlobalClasses.AddRange(ctx.classDefinition()
+            .Select(static classDefinitionContext => new RapClass().FromRapContext<RapClass>(classDefinitionContext)));
+        return (Tself) (IRapEntry) this;
     }
-
-    public static RapFile FromBinaryFormat(RapBinaryReader reader) {
-        throw new NotImplementedException();
-        
-    }
-
-    public RapFile FromRapContext(PoseidonParser.ComputationalUnitContext ctx) => FromRapFormat(ctx);
-    public RapFile FromBinaryContext(RapBinaryReader reader, bool defaultFalse) => FromBinaryFormat(reader);
 }

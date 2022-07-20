@@ -9,7 +9,7 @@ public class RVMatObfuscationListener : PoseidonBaseListener {
     internal Dictionary<string, string> ObfuscatedPaths { get; init; } = new();
 
     public override void ExitLiteralString(PoseidonParser.LiteralStringContext context) {
-        var str = RapString.FromParseContext(context);
+        var str = new RapString().FromRapContext<RapString>(context);
         if (ObfuscatedPaths.ContainsKey(str.Value)) {
             Rewriter.Replace(context.Start, context.Stop, $"\"{ObfuscatedPaths[str.Value]}\"");
             
