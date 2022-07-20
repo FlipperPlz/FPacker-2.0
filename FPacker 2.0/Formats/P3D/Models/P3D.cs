@@ -8,16 +8,18 @@ public abstract class P3D {
     public abstract P3D_LOD[] LODs { get; }
     public abstract float Mass { get; }
 
-    public static P3D GetInstance(string fileName) {
-        System.IO.Stream stream = File.OpenRead(fileName);
+    public static P3D GetInstance(string fileName) => GetInstance(File.OpenRead(fileName));
+
+    public virtual P3D_LOD GetLOD(float resolution) => LODs.FirstOrDefault((P3D_LOD lod) => lod.Resolution == resolution);
+
+    public static P3D GetInstance(Stream stream) { 
         var type = new P3DBinaryReader( stream ).ReadAscii( 4 );
-        stream.Close();
+        stream.Position -= 4;
+        
         return type switch {
-            "ODOL" => new ODOL.ODOL(fileName),
-            "MLOD" => new MLOD.MLOD(fileName),
+            "ODOL" => new ODOL.ODOL(stream),
+            "MLOD" => new MLOD.MLOD(stream),
             _ => throw new FormatException()
         };
     }
-    
-    public virtual P3D_LOD GetLOD(float resolution) => LODs.FirstOrDefault((P3D_LOD lod) => lod.Resolution == resolution);
 }

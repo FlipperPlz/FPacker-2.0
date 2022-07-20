@@ -27,12 +27,10 @@ public class ODOL : P3D {
 
 	public readonly string FileName;
 
-	public ODOL(string fileName) {
-		FileName = fileName; 
-		Stream stream = File.OpenRead(fileName);
-		Read(new P3DBinaryReader(stream));
-	}
-
+	public ODOL(string fileName) : this(File.OpenRead(fileName)) => FileName = fileName; 
+	
+	public ODOL(Stream stream) => Read(new P3DBinaryReader(stream));
+	
 	public bool IsSnappable() {
 		var lod = this._lods.FirstOrDefault(static  l => l.Resolution.getLODType() == LodName.Memory);
 		if (lod == null) return false;

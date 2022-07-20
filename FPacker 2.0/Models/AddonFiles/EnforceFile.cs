@@ -9,40 +9,17 @@
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using FPacker.Antlr.Enforce;
-using FPacker.Antlr.Poseidon;
+using FPacker.Formats.Enforce.Models;
 using FPacker.Formats.Enforce.Parse;
-using FPacker.Formats.RVMAT.Parse;
 
-namespace FPacker.Formats.Enforce.Models; 
+namespace FPacker.Models.AddonFiles; 
 
-public class EnforceFile {
-    public string PBOPath { get; init; }
-    public string PBOReferencePath { get; init; }
-    public string ObfuscatedPBOPath { get; set; }
-    public string ObfuscatedPBORefPath { get; set; }
+public class EnforceFileSerializable : BaseAddonFileSerializable<EnforceScript> {
     public List<int> Modules { get; set; }
-
-    public string SystemPath { get; init; }
     
-    public EnforceScript EnforceData { get; private set; }
-    
-    public EnforceFile(string pboPath, string pboRefPath, string systemPath) {
-        PBOPath = pboPath;
-        PBOReferencePath = pboRefPath;
-        SystemPath = systemPath;
-        ParseEnforce();
-    }
-
-    private void ParseEnforce() {
-        var lexer = new EnforceLexer(CharStreams.fromPath(SystemPath));
-        var parser = new EnforceParser(new CommonTokenStream(lexer));
-        var listener = new EnforcePreParser();
-        new ParseTreeWalker().Walk(listener, parser.computationalUnit());
-        EnforceData = listener.Script;
-    }
     
     public void ObfuscateScripts() {
-        var lexer = new EnforceLexer(CharStreams.fromString(EnforceData.ToEnforceFormat()));
+        var lexer = new EnforceLexer(CharStreams.fromString(ObjectBase.ToEnforceFormat()));
         var tokens = new CommonTokenStream(lexer);
         var rewriter = new TokenStreamRewriter(tokens);
         var parser = new EnforceParser(tokens);
@@ -58,7 +35,16 @@ public class EnforceFile {
         var parser = new EnforceParser(new CommonTokenStream(lexer));
         var listener = new EnforcePreParser();
         new ParseTreeWalker().Walk(listener, parser.computationalUnit());
-        EnforceData = listener.Script;
+        ObjectBase = listener.Script;
+    }
+
+    public EnforceFileSerializable(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath, systemPath) { }
+    protected override void ParseObject(Stream data) {
+        var lexer = new EnforceLexer(CharStreams.fromPath(SystemPath));
+        var parser = new EnforceParser(new CommonTokenStream(lexer));
+        var listener = new EnforcePreParser();
+        new ParseTreeWalker().Walk(listener, parser.computationalUnit());
+        ObjectBase = listener.Script;
     }
 }
 

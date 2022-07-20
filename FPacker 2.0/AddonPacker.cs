@@ -1,13 +1,8 @@
 ﻿using System.Diagnostics;
-using System.Net;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using FPacker.Formats.CPP.Models;
-using FPacker.Formats.Enforce.Models;
-using FPacker.Formats.RAP.Models;
-using FPacker.Formats.RVMAT.Models;
+using FPacker.Models.AddonFiles;
 using FPacker.P3D.Models;
 using FPacker.P3D.Models.MLOD;
 using FPacker.P3D.Models.ODOL;
@@ -16,7 +11,6 @@ using FPacker.PBO.Enums;
 using FPacker.PBO.Models;
 using NLog;
 using NLog.Config;
-using NLog.Fluent;
 using static System.String;
 
 namespace FPacker;
@@ -55,11 +49,10 @@ internal class AddonPacker {
     private readonly List<string> _foundSamplePaths = new();
 
 
-    private readonly List<EnforceFile> _scripts = new();
-    private readonly List<ConfigFile> _configs = new();
-    private readonly List<RVMatFile> _materials = new();
+    private readonly List<EnforceFileSerializable> _scripts = new();
+    private readonly List<ConfigFileSerializable> _configs = new();
+    private readonly List<RvMatFile> _materials = new();
     private readonly List<AddonFile> _samples = new();
-
     private readonly List<P3DFile> _models = new();
     
 
@@ -72,7 +65,7 @@ internal class AddonPacker {
         foreach (var file in new DirectoryInfo(sourceFolder).GetFiles("config.*", SearchOption.AllDirectories)) {
             Logger.Info("Parsing config: {fileName}", file.FullName);
             var pboPath = PBOUtilities.GetRelativePath(sourceFolder, file.FullName);
-            var cfg = new ConfigFile(pboPath, file.FullName);
+            var cfg = new ConfigFileSerializable(pboPath, file.FullName, file.FullName);
             _configs.Add(cfg);
             _prefixes.AddRange(cfg.PrefixObjs);
             foreach (var modelPath in cfg.ModelPaths) {
@@ -110,7 +103,7 @@ internal class AddonPacker {
                         }
                         if(obfuscatedPBORefPath is null) Console.Write("fuck");
                         
-                        var foundScript = new EnforceFile(pboPath, pboRefPath, systemPath) {
+                        var foundScript = new EnforceFileSerializable(pboPath, pboRefPath, systemPath) {
                             Modules = new List<int> {moduleNum}, 
                             ObfuscatedPBOPath = ConvertPBORefPath2PBOPath(obfuscatedPBORefPath), 
                             ObfuscatedPBORefPath = obfuscatedPBORefPath
@@ -127,7 +120,7 @@ internal class AddonPacker {
                             }
                             Logger.Info("Parsing Enforce file: {childSystemPath}", systemPath);
 
-                            var foundScript = new EnforceFile(childPboPath, childPboRefPath, childSystemPath) {
+                            var foundScript = new EnforceFileSerializable(childPboPath, childPboRefPath, childSystemPath) {
                                 Modules = new List<int> {moduleNum},
                                 ObfuscatedPBOPath = ConvertPBORefPath2PBOPath(obfuscatedPBORefPath),
                                 ObfuscatedPBORefPath = obfuscatedPBORefPath
@@ -172,7 +165,7 @@ internal class AddonPacker {
             if(systemPath is null || !File.Exists(systemPath)) continue;
             var pboPath = ConvertPBORefPath2PBOPath(SanitizePBOPath(rvMatPath));
             Logger.Info("Parsing RVMat: {sysPath}", systemPath);
-            var rvmat = new RVMatFile(pboPath, pboRefPath, systemPath);
+            var rvmat = new RvMatFile(pboPath, pboRefPath, systemPath);
             _materials.Add(rvmat);
             foundPaths.AddRange(rvmat.TexturePaths);
         }
@@ -247,18 +240,20 @@ internal class AddonPacker {
 
         foreach (var model in _models) {
             Logger.Info("Obfuscating P3D: {pboFile}", model.PBOPath);
-            foreach (var foundPath in model.FoundPaths.Where(foundPath => _obfuscatedPaths.ContainsKey(foundPath))) model.ObfuscatedPaths.Add(foundPath, _obfuscatedPaths[foundPath]);
+            foreach (var foundPath in model.FoundPaths.Where(foundPath => _obfuscatedPaths.ContainsKey(foundPath))) {
+                model.ObfuscatedPaths.Add(foundPath, _obfuscatedPaths[foundPath]);
+            }
             model.ObfuscatePaths(ConvertPBORefPath2PBOPath(_obfuscatedPaths[model.PBOReferencePath]), _obfuscatedPaths[model.PBOReferencePath]);
         }
 
         var entries = new List<PBOEntry>();
-        entries.AddRange(_materials.Select(static materialFile => new PBOEntry(materialFile.ObfuscatedPBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.RVMAT, Encoding.UTF8.GetBytes(materialFile.RVMatData.ToRapFormat()), materialFile.SystemPath)));
-        entries.AddRange(_configs.Select(static configFile => new PBOEntry(configFile.PBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.PoseidonConfig, Encoding.UTF8.GetBytes(configFile.PoseidonConfig.ToRapFormat()), configFile.SystemPath)));
+        entries.AddRange(_materials.Select(static materialFile => new PBOEntry(materialFile.ObfuscatedPBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.RVMAT, Encoding.UTF8.GetBytes(materialFile.ObjectBase.ToRapFormat()), materialFile.SystemPath)));
+        entries.AddRange(_configs.Select(static configFile => new PBOEntry(configFile.PBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.PoseidonConfig, Encoding.UTF8.GetBytes(configFile.ObjectBase.ToRapFormat()), configFile.SystemPath)));
         foreach (var sampleFile in _samples) {
             entries.Add(new PBOEntry(sampleFile.PBOObfuscatedPath, (int) EntryPackingType.Uncompressed, EntryDataType.Audio, File.ReadAllBytes(sampleFile.SystemPath)));
         }
         foreach (var model in _models) {
-            switch (model.P3DData) {
+            switch (model.ObjectBase) {
                 case ODOL odol:
                     //TODO: Write ODOL
                     entries.Add(new PBOEntry(model.PBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.Model, FormatConversion.Covert2MLOD(odol).WriteToMemory().ToArray()));

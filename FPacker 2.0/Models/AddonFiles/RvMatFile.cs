@@ -3,38 +3,17 @@ using Antlr4.Runtime.Tree;
 using FPacker.Antlr.Poseidon;
 using FPacker.Formats.RAP.Models;
 using FPacker.Formats.RVMAT.Parse;
+using FPacker.Models;
 
-namespace FPacker.Formats.RVMAT.Models; 
+namespace FPacker.Models.AddonFiles; 
 
-public class RVMatFile {
-    public string PBOPath { get; init; }
-    public string PBOReferencePath { get; init; }
-    public string ObfuscatedPBOPath { get; private set; }
-    public string ObfuscatedPBORefPath { get; private set; }
+public class RvMatFile : BaseAddonFileSerializable<RapFile> {
 
-    public string SystemPath { get; init; }
-    
-    public RapFile RVMatData { get; private set; }
-    
     public List<string> TexturePaths { get; private set; }
     public Dictionary<string, string> ObfuscatedPaths { get; set; } = new();
-
     
-    public RVMatFile(string pboPath, string pboRefPath, string systemPath) {
-        PBOPath = pboPath;
-        PBOReferencePath = pboRefPath;
-        SystemPath = systemPath;
-        ParseRVMat();
-    }
+    public RvMatFile(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath, systemPath) { }
 
-    private void ParseRVMat() {
-        var lexer = new PoseidonLexer(CharStreams.fromPath(SystemPath));
-        var parser = new PoseidonParser(new CommonTokenStream(lexer));
-        var listener = new RVMatPreParser();
-        new ParseTreeWalker().Walk(listener, parser.computationalUnit());
-        RVMatData = listener.RvmatFile;
-        TexturePaths = listener.TexturePaths;
-    }
 
     public void ObfuscatePaths(string obfPBOPath, string obfPBORefPath) {
         ObfuscatedPBOPath = obfPBOPath;
@@ -54,7 +33,17 @@ public class RVMatFile {
         var parser = new PoseidonParser(new CommonTokenStream(lexer));
         var listener = new RVMatPreParser();
         new ParseTreeWalker().Walk(listener, parser.computationalUnit());
-        RVMatData = listener.RvmatFile;
+        ObjectBase = listener.RvmatFile;
         TexturePaths = listener.TexturePaths;
     }
+
+    protected override void ParseObject(Stream data) {
+        var lexer = new PoseidonLexer(CharStreams.fromStream(data));
+        var parser = new PoseidonParser(new CommonTokenStream(lexer));
+        var listener = new RVMatPreParser();
+        new ParseTreeWalker().Walk(listener, parser.computationalUnit());
+        ObjectBase = listener.RvmatFile;
+        TexturePaths = listener.TexturePaths;
+    }
+
 }

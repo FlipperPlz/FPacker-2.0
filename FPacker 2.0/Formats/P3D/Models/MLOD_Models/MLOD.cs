@@ -8,10 +8,8 @@ public class MLOD : P3D {
     private MLOD_LOD[] lods;
 
     public MLOD(string fileName) {
-        var array = File.ReadAllBytes(fileName);
-        var binaryReaderEx = new P3DBinaryReader(new MemoryStream(array, 0, array.Length, false, true));
-        this.Read(binaryReaderEx);
-        binaryReaderEx.Close();
+        using var binaryReaderEx = new P3DBinaryReader(File.OpenRead(fileName));
+        Read(binaryReaderEx);
     }
     
     public MLOD(Stream stream) => this.Read(new P3DBinaryReader(stream));

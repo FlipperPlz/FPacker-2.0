@@ -2,13 +2,14 @@
 using FPacker.Antlr.Poseidon;
 using FPacker.Formats.Enforce.Models;
 using FPacker.Formats.RAP.Models.Values;
+using FPacker.Models.AddonFiles;
 
 namespace FPacker.Formats.CPP.Parse;
 
 public class ConfigObfuscationListener : PoseidonBaseListener {
     internal TokenStreamRewriter Rewriter { get; init; }
     internal Dictionary<string, string> ObfuscatedPaths { get; init; } = new();
-    internal List<EnforceFile> EnforceFiles { get; init; } = new();
+    internal List<EnforceFileSerializable> EnforceFiles { get; init; } = new();
 
     public override void ExitLiteralString(PoseidonParser.LiteralStringContext context) {
         var str = RapString.FromParseContext(context);

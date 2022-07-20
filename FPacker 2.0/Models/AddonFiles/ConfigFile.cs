@@ -4,17 +4,17 @@ using FPacker.Antlr.Poseidon;
 using FPacker.Formats.CPP.Parse;
 using FPacker.Formats.Enforce.Models;
 using FPacker.Formats.RAP.Models;
+using FPacker.Models;
 
-namespace FPacker.Formats.CPP.Models; 
+namespace FPacker.Models.AddonFiles; 
 
-class ConfigFile {
-    public string PBOPath { get; private set; }
+class ConfigFileSerializable : BaseAddonFileSerializable<RapFile> {
     public string PBOConfigRoot { get; private set; }
-    public string SystemPath { get; init; }
     public string SystemConfigRoot { get; private set; }
-    public RapFile PoseidonConfig { get;  private set; }
-    public List<AddonPrefix> PrefixObjs { get; private set; } = new();
+    public string ObfuscatedPBOConfigRoot { get; private set; }
+
     
+    public List<AddonPrefix> PrefixObjs { get; private set; } = new();
     public List<string> ModelPaths { get; private set; }
     public List<string> TexturePaths { get; private set; }
     public List<string> MaterialPaths { get; private set; }
@@ -29,27 +29,24 @@ class ConfigFile {
     
     public List<string> FoundPaths = new();
     
-    public List<EnforceFile> ReferencedScripts = new();
+    public List<EnforceFileSerializable> ReferencedScripts = new();
 
 
 
     public Dictionary<string, string> ObfuscatedPaths { get; private set; } = new();
 
-
-    public ConfigFile(string pboPath, string systemPath) {
-        PBOPath = pboPath;
-        SystemPath = systemPath;
-        SystemConfigRoot = SystemPath.Replace(new FileInfo(systemPath).Name, "");
-        PBOConfigRoot = PBOPath.Replace(new FileInfo(systemPath).Name, "");
-        ParseConfig();
+    public ConfigFileSerializable(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath, systemPath) {
     }
 
-    private void ParseConfig() {
-        var lexer = new PoseidonLexer(CharStreams.fromPath(SystemPath));
+    
+    protected override void ParseObject(Stream stream) {
+        var lexer = new PoseidonLexer(CharStreams.fromStream(stream));
         var parser = new PoseidonParser(new CommonTokenStream(lexer));
         var listener = new ConfigPreParser();
         new ParseTreeWalker().Walk(listener, parser.computationalUnit());
-        PoseidonConfig = listener.ConfigFile;
+        ObjectBase = listener.ConfigFile;
+        PBOConfigRoot = PBOPath.Replace(new FileInfo(SystemPath).Name, "");
+        SystemConfigRoot = SystemPath.Replace(new FileInfo(SystemPath).Name, "");
         listener.EstablishedPrefixes.ForEach(p => PrefixObjs.Add(new AddonPrefix() {
             PrefixName = p,
             PBOPath = PBOConfigRoot,
@@ -96,7 +93,7 @@ class ConfigFile {
 
         var listener = new ConfigPreParser();
         new ParseTreeWalker().Walk(listener, parser.computationalUnit());
-        PoseidonConfig = listener.ConfigFile;
+        ObjectBase = listener.ConfigFile;
         ModelPaths = listener.ModelPaths;
         TexturePaths = listener.TexturePaths;
         MaterialPaths = listener.MaterialPaths;
@@ -106,4 +103,5 @@ class ConfigFile {
         FoundPaths.AddRange(MaterialPaths);
         FoundPaths.AddRange(SoundSamplePaths);
     }
+
 }
