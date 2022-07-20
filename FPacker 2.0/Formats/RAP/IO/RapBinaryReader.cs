@@ -24,22 +24,16 @@ public class RapBinaryReader : BinaryReader {
     public RapBinaryReader(byte[] binaryData) : base(new MemoryStream(binaryData, false)) { }
 
     public int ReadCompressedInteger() {
-        int value;
-        if ((value = ReadByte()) == 0) {
-            return 0;
-        }
-
-        while ((value & 0x80) != 0) {
-            int extra;
-            if ((extra = ReadByte()) == 0) return 0;
-
-            value += (extra - 1) * 0x80;
+        var value = 0;
+        for (var i = 0;; ++i) {
+            var v = ReadByte();
+            value |= v & 0x7F << (7 * i);
+            if((v & 0x80) == 0) break;
         }
 
         return value;
-        
     }
-
+    
     
     //TODO:Move to BaseValueType
     public RapString ReadRapString() => new(ReadAsciiZ());
