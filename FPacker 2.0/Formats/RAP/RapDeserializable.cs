@@ -10,6 +10,6 @@ public interface IRapDeserializable : IRapSerializable {
 
 public interface IRapSerializable {
     public string ToRapFormat();
-    public void ToBinaryContext(RapBinaryWriter writer);
+    public void ToBinaryContext(RapBinaryWriter writer, bool defaultFalse = false);
 }
 

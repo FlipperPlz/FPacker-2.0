@@ -9,7 +9,22 @@ namespace FPacker.Formats.RAP.Models;
 
 public class RapVariableStatement : IRapEntry {
     public string VariableName { get; set; }
-    public RapValueType VariableType { get; private set; }
+
+    public RapValueType VariableType {
+        get {
+            return VariableValue switch {
+                RapArray => RapValueType.Array,
+                RapString => RapValueType.String,
+                RapFloat => RapValueType.Float,
+                RapInt => RapValueType.Long,
+                _ => throw new Exception()
+            };
+        }
+        private set => _parsedValue = value;
+    }
+
+    private RapValueType? _parsedValue;
+
     public IRapSerializable VariableValue { get; set; }
 
     public string ToRapFormat() {
@@ -18,8 +33,33 @@ public class RapVariableStatement : IRapEntry {
         return builder.Append(" = ").Append(VariableValue.ToRapFormat()).Append(';').ToString();
     }
 
-    public void ToBinaryContext(RapBinaryWriter writer) {
-        throw new NotImplementedException();
+    public void ToBinaryContext(RapBinaryWriter writer, bool isArray = false) {
+        if (VariableValue is RapArray || VariableType is RapValueType.Array || isArray) {
+            writer.WriteAsciiZ(VariableName);
+            writer.WriteBinarizedValue(VariableValue as RapArray ?? throw new Exception());
+            return;
+        }
+         
+        writer.Write(((byte) VariableType));
+        writer.WriteAsciiZ(VariableName);
+        switch(VariableType) {
+            case RapValueType.String:
+                writer.WriteBinarizedValue((RapString) VariableValue);
+                return;
+            case RapValueType.Float:
+                writer.WriteBinarizedValue((RapFloat) VariableValue);
+                return;
+            case RapValueType.Long:
+                writer.WriteBinarizedValue((RapInt) VariableValue);
+                return;
+            case RapValueType.Array:
+                writer.WriteBinarizedValue((RapArray) VariableValue);
+                return;
+            case RapValueType.Variable:
+                throw new Exception("Variables not supported yet.");
+            default:
+                throw new ArgumentOutOfRangeException();
+        };
     }
 
     public Tself FromRapContext<Tself>(ParserRuleContext context) where Tself : IRapDeserializable {

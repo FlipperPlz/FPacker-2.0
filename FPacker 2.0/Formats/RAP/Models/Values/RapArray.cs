@@ -8,6 +8,7 @@ using FPacker.P3D.IO;
 namespace FPacker.Formats.RAP.Models.Values; 
 
 public class RapArray : RapValue<List<IRapValue>> {
+    
     public int EntryCount;
 
     public RapArray() => Value = new List<IRapValue>(); 
@@ -18,8 +19,14 @@ public class RapArray : RapValue<List<IRapValue>> {
     }
 
     public override string ToRapFormat() => new StringBuilder("{").Append(string.Join(',', Value.Select(static v => v.ToRapFormat()))).Append('}').ToString();
-    public override void ToBinaryContext(RapBinaryWriter writer) {
-        throw new NotImplementedException();
+    public override void ToBinaryContext(RapBinaryWriter writer, bool defaultFalse = false) {
+        writer.WriteCompressedInt(Value.Count);
+        if (EntryCount == 0) return;
+
+        foreach (var val in Value) {
+            writer.Write(val.Type());
+            val.ToBinaryContext(writer);
+        }
     }
 
     
@@ -84,4 +91,6 @@ public class RapArray : RapValue<List<IRapValue>> {
 
         return (Tself) (IRapValue) this;
     }
+
+    public override byte Type() => (byte) RapValueType.Array;
 }

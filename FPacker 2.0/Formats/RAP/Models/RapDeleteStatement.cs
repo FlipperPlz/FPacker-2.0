@@ -11,9 +11,7 @@ public class RapDeleteStatement : IRapEntry {
     
     public string ToRapFormat() => new StringBuilder("delete ").Append(Label).Append(';').ToString();
     
-    public void ToBinaryContext(RapBinaryWriter writer) {
-        throw new NotImplementedException();
-    }
+    public void ToBinaryContext(RapBinaryWriter writer, bool defaultFalse = false) => writer.WriteAsciiZ(Label);
 
     public Tself FromRapContext<Tself>(ParserRuleContext context) where Tself : IRapDeserializable {
         if (context is not PoseidonParser.DeleteStatementContext ctx) throw new Exception();

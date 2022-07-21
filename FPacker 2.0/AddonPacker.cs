@@ -291,7 +291,7 @@ internal class AddonPacker {
     }
 
     private void InitializeLogger() {
-        NLog.LogManager.Configuration = new XmlLoggingConfiguration(@"C:\Users\dev\Desktop\FPacker 2.0\FPacker 2.0\NLog.config",true);
+        NLog.LogManager.Configuration = new XmlLoggingConfiguration(@"..\..\..\NLog.config",true);
     }
 
     private string? ConvertPBORefPath2SystemPath(string pboRefPath) {

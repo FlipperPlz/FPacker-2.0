@@ -3,6 +3,7 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using FPacker.Antlr.Poseidon;
 using FPacker.Formats.RAP.IO;
+using FPacker.Formats.RAP.Models.Enums;
 
 namespace FPacker.Formats.RAP.Models.Values; 
 
@@ -10,7 +11,7 @@ public class RapFloat : RapValue<float> {
     public RapFloat(float f) => Value = f;
     public RapFloat() { }
     public override string ToRapFormat() => Value.ToString(CultureInfo.CurrentCulture);
-    public override void ToBinaryContext(RapBinaryWriter writer) => writer.Write((float) Value);
+    public override void ToBinaryContext(RapBinaryWriter writer, bool defaultFalse = false) => writer.Write((float) Value);
 
     public override U FromRapContext<U>(ParserRuleContext ctx) {
         if (ctx is not PoseidonParser.LiteralFloatContext) throw new Exception();
@@ -22,5 +23,6 @@ public class RapFloat : RapValue<float> {
         Value = reader.ReadSingle();
         return (U) (IRapValue) this;
     }
+    public override byte Type() => (byte) RapValueType.Float;
 
 }

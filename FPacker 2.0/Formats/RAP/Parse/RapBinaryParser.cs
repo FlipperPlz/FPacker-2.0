@@ -76,9 +76,9 @@ public class RapBinaryParser : IDisposable {
 
         var parent = _reader.ReadAsciiZ();
         child.ParentClass = (parent == string.Empty) ? null : parent;
-        child.EntryCount = _reader.ReadCompressedInteger();
+        var EntryCount = _reader.ReadCompressedInteger();
 
-        for (var i = 0; i < child.EntryCount; ++i) AddEntryToClass(child);
+        for (var i = 0; i < EntryCount; ++i) AddEntryToClass(child);
 
         child.ChildClasses.ForEach(LoadChildClasses);
     }

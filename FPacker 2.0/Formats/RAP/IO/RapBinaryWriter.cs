@@ -37,8 +37,8 @@ public class RapBinaryWriter : BinaryWriter {
     }
 
     public void WriteBinarizedValue<TValue>(TValue value) where TValue : IRapDeserializable, IRapValue =>
-        value.ToBinaryContext(this);
+        value.ToBinaryContext(this, false);
 
-    public void WriteBinarizedEntry<TEntry>(TEntry entry) where TEntry : IRapDeserializable, IRapEntry =>
-        entry.ToBinaryContext(this);
+    public void WriteBinarizedEntry<TEntry>(TEntry entry, bool defaultFalse = false) where TEntry : IRapDeserializable, IRapEntry =>
+        entry.ToBinaryContext(this, defaultFalse);
 }

@@ -3,12 +3,13 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using FPacker.Antlr.Poseidon;
 using FPacker.Formats.RAP.IO;
+using FPacker.Formats.RAP.Models.Enums;
 
 namespace FPacker.Formats.RAP.Models.Values; 
 
 public class RapString : RapValue<string> {
     public override string ToRapFormat() => new StringBuilder("\"").Append(Value).Append('"').ToString();
-    public override void ToBinaryContext(RapBinaryWriter writer) => writer.WriteAsciiZ(Value);
+    public override void ToBinaryContext(RapBinaryWriter writer, bool defaultFalse = false) => writer.WriteAsciiZ(Value);
     
     public RapString(string str) => Value = str;
     public RapString() {}
@@ -23,5 +24,6 @@ public class RapString : RapValue<string> {
         Value = reader.ReadAsciiZ();
         return (U) (IRapValue) this;
     }
-    
+    public override byte Type() => (byte) RapValueType.String;
+
 }
