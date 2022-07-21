@@ -19,7 +19,6 @@
     <ItemGroup>
       <Folder Include="Formats\CPP\Models" />
       <Folder Include="Formats\RAP\Parse" />
-      <Folder Include="Formats\RVMAT\Models" />
     </ItemGroup>
 
 </Project>

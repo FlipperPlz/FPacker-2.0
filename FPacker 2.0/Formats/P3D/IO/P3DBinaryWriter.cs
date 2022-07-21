@@ -90,13 +90,13 @@ public class P3DBinaryWriter : BinaryWriter {
         else WriteLZSS(bytes);
     }
 
-    public void WriteCompressedArray<T>(T[] array, Action<P3DBinaryWriter, T> write, int size, bool forceCompressed = false) {
+    public void WriteCompressedArray<T>(T[] array, Action<P3DBinaryWriter, T> write, int size) {
+        throw new NotImplementedException("Broken");
         var mem = new MemoryStream();
         using (var writer = new P3DBinaryWriter(mem)) foreach (var item in array)write(writer, item);
         Write(array.Length);
         var bytes = mem.ToArray();
         if (array.Length * size != bytes.Length) throw new InvalidOperationException();
-        WriteCompressed(bytes, forceCompressed);
     }
     
     public void WriteLZSS(byte[] bytes, bool inPAA = false) {

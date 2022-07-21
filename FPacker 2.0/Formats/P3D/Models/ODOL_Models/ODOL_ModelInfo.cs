@@ -74,9 +74,10 @@ public class ODOL_ModelInfo {
 	public sbyte UnknownSByte { get; set; }
 	public uint UnknownUInt { get; set; }
 
-	internal ODOL_ModelInfo(P3DBinaryReader input, int nLods) => Read(input, nLods);
+	internal ODOL_ModelInfo(P3DBinaryReader input, uint nLods) => 
+		Read(input, nLods);
 	
-	public void Read(P3DBinaryReader input, int nLods) {
+	public void Read(P3DBinaryReader input, uint nLods) {
 		var version = input.Version;
 		special = input.ReadInt32();
 		this.BoundingSphere = input.ReadSingle();
@@ -168,5 +169,94 @@ public class ODOL_ModelInfo {
 		for (var i = 0; i < nLods; i++) PreferredShadowVolumeLod[i] = input.ReadInt32();
 		for (var j = 0; j < nLods; j++) PreferredShadowBufferLod[j] = input.ReadInt32();
 		for (var k = 0; k < nLods; k++) PreferredShadowBufferLodVis[k] = input.ReadInt32();
+	}
+
+	public void Write(P3DBinaryWriter output, uint nLods) {
+		output.WriteInt32(special);
+		output.WriteSingle(BoundingSphere);
+		output.WriteSingle(GeometrySphere);
+		output.WriteInt32(Remarks);
+		output.WriteInt32(AndHints);
+		output.WriteInt32(OrHints);
+		AimingCenter.WriteObject(output);
+		output.WriteUInt32(Color.Value);
+		output.WriteUInt32(ColorType.Value);
+		output.WriteSingle(ViewDensity);
+		BboxMin.WriteObject(output);
+		BboxMax.WriteObject(output);
+		
+		if (output.Version >= 70U) output.WriteSingle(PropertyLodDensityCoefficient);
+		if (output.Version >= 71U) output.WriteSingle(PropertyDrawImportance);
+
+		if (output.Version >= 52U) {
+			BboxMinVisual.WriteObject(output);
+			BboxMaxVisual.WriteObject(output);
+		}
+		
+		BoundingCenter.WriteObject(output);
+		GeometryCenter.WriteObject(output);
+		CenterOfMass.WriteObject(output);
+		InvInertia.WriteObject(output);
+		output.Write(AutoCenter);
+		output.Write(LockAutoCenter);
+		output.Write(CanOcclude);
+		output.Write(CanBeOccluded);
+		if (output.Version >= 73U) output.Write(AiCovers);
+		if (output.Version >= 53U) output.Write(UnknownBytes);
+		
+		if (output.Version is >= 42U and < 10000U or >= 10042U) {
+			output.WriteSingle(HtMin);
+			output.WriteSingle(HtMax);
+			output.WriteSingle(AfMax);
+			output.WriteSingle(MfMax);
+		}
+		
+		if (output.Version is >= 43U and < 10000U or >= 10043U) {
+			output.WriteSingle(MFact);
+			output.WriteSingle(TBody);
+		}
+		
+		if (output.Version >= 33U) output.Write(ForceNotAlphaModel);
+		
+		if (output.Version >= 37U) {
+			output.WriteInt32((int) SbSource);
+			output.Write(PreferShadowVolume);
+		}
+		
+		if (output.Version >= 48U) output.WriteSingle(ShadowOffset);
+		output.Write(Animated);
+		Skeleton.Write(output);
+		output.Write((byte) MapType);
+		output.WriteCompressedFloatArray(MassArray);
+		output.WriteSingle(Mass);
+		output.WriteSingle(InvMass);
+		output.WriteSingle(Armor);
+		output.WriteSingle(InvArmor);
+		if (output.Version >= 72U) output.WriteSingle(PropertyExplosionShielding);
+		if (output.Version > 53U) output.WriteSingle(GeometrySimple);
+		if (output.Version >= 54U) output.WriteSingle(GeometryPhys);
+		output.Write(Memory);
+		output.Write(Geometry);
+		output.Write(GeometryFire);
+		output.Write(GeometryView);
+		output.Write(GeometryViewPilot);
+		output.Write(GeometryViewGunner);
+		output.Write(UnknownSByte);
+		output.Write(GeometryViewCargo);
+		output.Write(LandContact);
+		output.Write(Roadway);
+		output.Write(Paths);
+		output.Write(HitPoints);
+		output.WriteUInt32(MinShadow);
+		if (output.Version >= 38U) output.Write(CanBlend);
+		output.WriteAsciiZ(PropertyClass);
+		output.WriteAsciiZ(PropertyDamage);
+		output.Write(PropertyFrequent);
+		if (output.Version >= 31) output.WriteUInt32(UnknownUInt);
+		if (output.Version < 57U) return;
+		for (var i = 0; i < nLods; i++) output.Write(PreferredShadowVolumeLod[i]);
+		for (var i = 0; i < nLods; i++) output.Write(PreferredShadowBufferLod[i]);
+		for (var i = 0; i < nLods; i++) output.Write(PreferredShadowBufferLodVis[i]);
+		
 	}
 }
