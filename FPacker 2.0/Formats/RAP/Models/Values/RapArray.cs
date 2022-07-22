@@ -21,11 +21,29 @@ public class RapArray : RapValue<List<IRapValue>> {
     public override string ToRapFormat() => new StringBuilder("{").Append(string.Join(',', Value.Select(static v => v.ToRapFormat()))).Append('}').ToString();
     public override void ToBinaryContext(RapBinaryWriter writer, bool defaultFalse = false) {
         writer.WriteCompressedInt(Value.Count);
-        if (EntryCount == 0) return;
+        if (Value.Count == 0) return;
 
         foreach (var val in Value) {
-            writer.Write(val.Type());
-            val.ToBinaryContext(writer);
+            switch (val) {
+                case RapString rapString:
+                    writer.Write((byte) RapValueType.String);
+                    rapString.ToBinaryContext(writer);
+                    return;
+                case RapInt rapInt:
+                    writer.Write((byte) RapValueType.Long);
+                    rapInt.ToBinaryContext(writer);
+                    return;
+                case RapFloat rapFloat:
+                    writer.Write((byte) RapValueType.Float);
+                    rapFloat.ToBinaryContext(writer);
+                    return;
+                case RapArray rapArray:
+                    writer.Write((byte) RapValueType.Array);
+                    rapArray.ToBinaryContext(writer);
+                    return;
+                default:
+                    throw new Exception();
+            }
         }
     }
 

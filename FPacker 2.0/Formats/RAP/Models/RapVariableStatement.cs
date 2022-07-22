@@ -66,6 +66,7 @@ public class RapVariableStatement : IRapEntry {
         if (context is not PoseidonParser.VariableAssignmentContext ctx) throw new Exception();
         if (ctx.variableInitializer().arrayInitializer() is { } arrayInitializer) {
             VariableName = ctx.variableDeclaratorId().identifier().GetText();
+            
             _parsedValue = RapValueType.Array;
             VariableValue = new RapArray().FromRapContext<RapArray>(arrayInitializer);
             return (Tself) (IRapEntry) this;
