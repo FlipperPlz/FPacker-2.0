@@ -17,13 +17,13 @@ public class RapVariableStatement : IRapEntry {
                 RapString => RapValueType.String,
                 RapFloat => RapValueType.Float,
                 RapInt => RapValueType.Long,
-                _ => throw new Exception()
+                _ => _parsedValue
             };
         }
         private set => _parsedValue = value;
     }
 
-    private RapValueType? _parsedValue;
+    private RapValueType _parsedValue;
 
     public IRapSerializable VariableValue { get; set; }
 
@@ -66,22 +66,26 @@ public class RapVariableStatement : IRapEntry {
         if (context is not PoseidonParser.VariableAssignmentContext ctx) throw new Exception();
         if (ctx.variableInitializer().arrayInitializer() is { } arrayInitializer) {
             VariableName = ctx.variableDeclaratorId().identifier().GetText();
+            _parsedValue = RapValueType.Array;
             VariableValue = new RapArray().FromRapContext<RapArray>(arrayInitializer);
             return (Tself) (IRapEntry) this;
         }
         if (ctx.variableInitializer().literal().literalFloat() is { } floatContext) {
             VariableName = ctx.variableDeclaratorId().identifier().GetText();
+            _parsedValue = RapValueType.Float;
             VariableValue = new RapFloat().FromRapContext<RapFloat>(floatContext);
             return (Tself) (IRapEntry) this;
         }
         if (ctx.variableInitializer().literal().literalInteger() is { } integerContext) {
             VariableName = ctx.variableDeclaratorId().identifier().GetText();
+            _parsedValue = RapValueType.Long;
             VariableValue = new RapInt().FromRapContext<RapInt>(integerContext);
             return (Tself) (IRapEntry) this;
         }
         
         if (ctx.variableInitializer().literal().literalString() is { } stringContext) {
             VariableName = ctx.variableDeclaratorId().identifier().GetText();
+            _parsedValue = RapValueType.String;
             VariableValue = new RapString().FromRapContext<RapString>(stringContext);
             return (Tself) (IRapEntry) this;
         }
@@ -91,13 +95,13 @@ public class RapVariableStatement : IRapEntry {
 
     public Tself FromBinaryContext<Tself>(RapBinaryReader reader, bool isArray = false) where Tself : IRapDeserializable {
         if (isArray) {
-            VariableType = RapValueType.Array;
+            _parsedValue = RapValueType.Array;
             VariableName = reader.ReadAsciiZ();
             VariableValue = reader.ReadBinarizedValue<RapArray>();
             return (Tself) (IRapEntry) this;
         }
 
-        VariableType = (RapValueType) reader.ReadByte();
+        _parsedValue = (RapValueType) reader.ReadByte();
         VariableName = reader.ReadAsciiZ();
         
         IRapSerializable value = VariableType switch {

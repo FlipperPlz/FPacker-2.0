@@ -13,13 +13,18 @@ public class RapClass : IRapEntry {
     public List<RapDeleteStatement> DeleteStatements { get; init; } = new();
     public List<RapVariableStatement> VariableStatements { get; init; } = new();
     public List<RapClass> ChildClasses { get; init; } = new();
+    
+    public List<RapClass> ChildExternalClasses => ChildClasses.Where(static c => c.ExternalClass).ToList();
+    public List<RapClass> ChildRegularClasses => ChildClasses.Where(static c => !c.ExternalClass).ToList();
+    public List<RapVariableStatement> ArrayStatements => VariableStatements.Where(static v => v.VariableType is RapValueType.Array).ToList();
+    public List<RapVariableStatement> TokenStatements => VariableStatements.Where(static v => v.VariableType is not RapValueType.Array).ToList();
 
-    public uint BinaryOffset { get; set; }
+    
+    public uint BinaryOffset { get; set; } //Position in stream where data starts
+    public long BinaryOffsetPosition { get; set; } //Position in stream where BinaryOffset is written;
 
     public int EntryCount => ChildClasses.Count + VariableStatements.Count + DeleteStatements.Count;
 
-
-    public long OffsetPosition { get; private set; }
     
     public string ToRapFormat() {
         var builder = new StringBuilder("class ").Append(ClassName);
@@ -66,10 +71,9 @@ public class RapClass : IRapEntry {
     
     public void ToBinaryContext(RapBinaryWriter writer, bool externalClass = false) {
         writer.WriteAsciiZ(ClassName);
-        if (!ExternalClass || externalClass) {
-            OffsetPosition = writer.Position;
-            writer.Write((uint) BinaryOffset);
-        }
+        if (ExternalClass || externalClass) return;
+        BinaryOffsetPosition = writer.Position;
+        writer.Write((uint) 9999);
     }
 
     public Tself FromBinaryContext<Tself>(RapBinaryReader reader, bool externalClass = false) where Tself : IRapDeserializable {
@@ -79,26 +83,5 @@ public class RapClass : IRapEntry {
         return (Tself) (IRapEntry) this;
     }
 
-    public void WriteEntries(RapBinaryWriter writer) {
-        foreach (var array in VariableStatements.Where(static g => g.VariableType is RapValueType.Array)) {
-            writer.Write((byte) RapEntryType.RapArray);
-            array.ToBinaryContext(writer, true);
-        }
-        foreach (var variable in VariableStatements.Where(static g => g.VariableType is not RapValueType.Array)) {
-            writer.Write((byte) RapEntryType.RapValue);
-            variable.ToBinaryContext(writer, false);
-        }
-        foreach (var externalRapClass in ChildClasses.Where(static g => g.ExternalClass)) {
-            writer.Write((byte) RapEntryType.RapExternClass);
-            externalRapClass.ToBinaryContext(writer, true);
-        }
-        foreach (var rapClass in ChildClasses.Where(static g => !g.ExternalClass)) {
-            writer.Write((byte) RapEntryType.RapClass);
-            rapClass.ToBinaryContext(writer, true);
-        }
-        foreach (var rapDeleteStatement in DeleteStatements) {
-            writer.Write((byte) RapEntryType.RapDeleteClass);
-            rapDeleteStatement.ToBinaryContext(writer, true);
-        }
-    }
+    
 }

@@ -31,7 +31,7 @@ public class RapBinaryWriter : BinaryWriter {
         }
     }
     
-    public void WriteAsciiZ(string text) {
+    public void WriteAsciiZ(string text = "") {
         Write(text.ToCharArray());
         Write(char.MinValue);
     }
