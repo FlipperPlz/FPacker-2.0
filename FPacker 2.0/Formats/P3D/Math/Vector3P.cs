@@ -61,8 +61,8 @@ public class Vector3P : IDeserializable {
     public void ReadCompressed(P3DBinaryReader input) {
         var num = _compressedAs = input.ReadInt32();
         var num2 = num & 1023;
-        var num3 = num >> 10 & 1023;
-        var num4 = num >> 20 & 1023;
+        var num3 = num >> 10 & 0x3FF;
+        var num4 = num >> 20 & 0x3FF;
         if (num2 > 511) num2 -= 1024;
         if (num3 > 511) num3 -= 1024;
         if (num4 > 511) num4 -= 1024;

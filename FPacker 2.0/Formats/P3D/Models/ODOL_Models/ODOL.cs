@@ -7,7 +7,7 @@ public class ODOL : P3D {
 	public const int MinimalVersion = 28;
 	private string _muzzleFlash;
 	private uint _appId;
-	public int _lodCount;
+	public uint _lodCount;
 	private float[] _resolutions;
 	public ODOL_ModelInfo ModelInfo;
 	private bool _hasAnims;
@@ -16,6 +16,7 @@ public class ODOL : P3D {
 	private uint[] _lodEndAddresses;
 	private bool[] _permanent;
 	private List<LoadableLodInfo> _loadableLodInfos;
+	
 	private LOD[] _lods;
 	private int buoyancyType;
 	
@@ -45,7 +46,7 @@ public class ODOL : P3D {
 	public void Write(P3DBinaryWriter output) {
 		output.Version = Version;
 
-		output.WriteAscii("ODOL", 4);
+		output.WriteAscii("ODOL", 4U);
 		output.WriteUInt32(Version);
 		
 		switch (Version) {
@@ -59,22 +60,22 @@ public class ODOL : P3D {
 		if (Version >= 59U) output.WriteUInt32(_appId);
 		if (Version >= 58U) output.WriteAsciiZ(_muzzleFlash);
 		
-		output.WriteUInt32((uint) LODs.Length);
-		foreach (var resolution in _resolutions) output.WriteSingle(resolution);
+		output.WriteUInt32(_lodCount);
+		for (var i = 0; i < _lodCount; i++) output.Write(_resolutions[i]);
+
+		ModelInfo.Write(output, _lodCount);
 		
-		//ModelInfo
-		WriteModelInfo(output);
 		if (Version >= 30U) {
 			output.Write(_hasAnims);
 			if (_hasAnims) animations.Write(output);
 		}
 
-		for (var i = 0; i < LODs.Length; i++) output.WriteUInt32(_lodStartAddresses[i]);
-		for (var i = 0; i < LODs.Length; i++) output.WriteUInt32(_lodEndAddresses[i]);
-		for (var i = 0; i < LODs.Length; i++) output.Write(_permanent[i]);
+		for (var i = 0; i < _lodCount; i++) output.WriteUInt32(_lodStartAddresses[i]);
+		for (var i = 0; i < _lodCount; i++) output.WriteUInt32(_lodEndAddresses[i]);
+		for (var i = 0; i < _lodCount; i++) output.Write(_permanent[i]);
 		
 		var position = output.Position;
-		for (var i = 0; i < _loadableLodInfos.Count; i++) {
+		for (var i = 0; i < _lodCount; i++) {
 			if (!_permanent[i]) {
 				_loadableLodInfos[i].WriteObject(output);
 				position = output.Position;
@@ -90,94 +91,6 @@ public class ODOL : P3D {
 		
 		output.Close();
 	}
-
-	private void WriteModelInfo(P3DBinaryWriter output) {
-		output.WriteInt32(ModelInfo.special);
-		output.WriteSingle(ModelInfo.BoundingSphere);
-		output.WriteSingle(ModelInfo.GeometrySphere);
-		output.WriteInt32(ModelInfo.Remarks);
-		output.WriteInt32(ModelInfo.AndHints);
-		ModelInfo.AimingCenter.WriteObject(output);
-		output.WriteUInt32(ModelInfo.Color.Value);
-		output.WriteUInt32(ModelInfo.ColorType.Value);
-		output.WriteSingle(ModelInfo.ViewDensity);
-		ModelInfo.BboxMin.WriteObject(output);
-		ModelInfo.BboxMax.WriteObject(output);
-		
-		if (Version >= 70U) output.WriteSingle(ModelInfo.PropertyLodDensityCoefficient);
-		if (Version >= 71U) output.WriteSingle(ModelInfo.PropertyDrawImportance);
-
-		if (Version >= 52U) {
-			ModelInfo.BboxMinVisual.WriteObject(output);
-			ModelInfo.BboxMaxVisual.WriteObject(output);
-		}
-		
-		ModelInfo.BoundingCenter.WriteObject(output);
-		ModelInfo.GeometryCenter.WriteObject(output);
-		ModelInfo.CenterOfMass.WriteObject(output);
-		ModelInfo.InvInertia.WriteObject(output);
-		output.Write(ModelInfo.AutoCenter);
-		output.Write(ModelInfo.LockAutoCenter);
-		output.Write(ModelInfo.CanOcclude);
-		output.Write(ModelInfo.CanBeOccluded);
-		if (Version >= 73U) output.Write(ModelInfo.AiCovers);
-		if (Version >= 53U) output.Write(ModelInfo.UnknownBytes);
-		
-		if (Version is >= 42U and < 10000U or >= 10042U) {
-			output.WriteSingle(ModelInfo.HtMin);
-			output.WriteSingle(ModelInfo.HtMax);
-			output.WriteSingle(ModelInfo.AfMax);
-			output.WriteSingle(ModelInfo.MfMax);
-		}
-		
-		if (Version is >= 43U and < 10000U or >= 10043U) {
-			output.WriteSingle(ModelInfo.MFact);
-			output.WriteSingle(ModelInfo.TBody);
-		}
-		
-		if (Version >= 33U) output.Write(ModelInfo.ForceNotAlphaModel);
-		
-		if (Version >= 37U) {
-			output.WriteInt32((int) ModelInfo.SbSource);
-			output.Write(ModelInfo.PreferShadowVolume);
-		}
-		
-		if (Version >= 48U) output.WriteSingle(ModelInfo.ShadowOffset);
-		output.Write(ModelInfo.Animated);
-		ModelInfo.Skeleton.Write(output);
-		output.Write((byte) ModelInfo.MapType);
-		output.WriteCompressedFloatArray(ModelInfo.MassArray);
-		output.WriteSingle(ModelInfo.Mass);
-		output.WriteSingle(ModelInfo.InvMass);
-		output.WriteSingle(ModelInfo.Armor);
-		output.WriteSingle(ModelInfo.InvArmor);
-		if (Version >= 72U) output.WriteSingle(ModelInfo.PropertyExplosionShielding);
-		if (Version > 53U) output.WriteSingle(ModelInfo.GeometrySimple);
-		if (Version >= 54U) output.WriteSingle(ModelInfo.GeometryPhys);
-		output.Write(ModelInfo.Memory);
-		output.Write(ModelInfo.Geometry);
-		output.Write(ModelInfo.GeometryFire);
-		output.Write(ModelInfo.GeometryView);
-		output.Write(ModelInfo.GeometryViewPilot);
-		output.Write(ModelInfo.GeometryViewGunner);
-		output.Write(ModelInfo.UnknownSByte);
-		output.Write(ModelInfo.GeometryViewCargo);
-		output.Write(ModelInfo.LandContact);
-		output.Write(ModelInfo.Roadway);
-		output.Write(ModelInfo.Paths);
-		output.Write(ModelInfo.HitPoints);
-		output.WriteUInt32(ModelInfo.MinShadow);
-		if (Version >= 38U) output.Write(ModelInfo.CanBlend);
-		output.WriteAsciiZ(ModelInfo.PropertyClass);
-		output.WriteAsciiZ(ModelInfo.PropertyDamage);
-		output.Write(ModelInfo.PropertyFrequent);
-		output.WriteUInt32(ModelInfo.UnknownUInt);
-		if (Version < 57U) return;
-		ModelInfo.PreferredShadowVolumeLod.ToList().ForEach(output.WriteInt32);
-		ModelInfo.PreferredShadowBufferLod.ToList().ForEach(output.WriteInt32);
-		ModelInfo.PreferredShadowBufferLodVis.ToList().ForEach(output.WriteInt32);
-	}
-
 
 	private void Read(P3DBinaryReader input) {
 		var b = input.ReadAscii(4);
@@ -196,7 +109,7 @@ public class ODOL : P3D {
 		if (Version >= 64U) input.UseCompressionFlag = true;
 		if (Version >= 59U) _appId = input.ReadUInt32();
 		if (Version >= 58U) _muzzleFlash = input.ReadAsciiZ();
-		_lodCount = input.ReadInt32();
+		_lodCount = input.ReadUInt32();
 		_resolutions = new float[_lodCount];
 		for (var i = 0; i < _lodCount; i++) _resolutions[i] = input.ReadSingle();
 		ModelInfo = new ODOL_ModelInfo(input, _lodCount);
@@ -210,11 +123,9 @@ public class ODOL : P3D {
 		for (var j = 0; j < _lodCount; j++) _lodStartAddresses[j] = input.ReadUInt32();
 		for (var k = 0; k < _lodCount; k++) _lodEndAddresses[k] = input.ReadUInt32();
 
-		for (var l = 0; l < _lodCount; l++) {
-			_permanent[l] = input.ReadBoolean();
-		}
+		for (var l = 0; l < _lodCount; l++) _permanent[l] = input.ReadBoolean();
 
-		_loadableLodInfos = new List<LoadableLodInfo>(_lodCount);
+		_loadableLodInfos = new List<LoadableLodInfo>((int) _lodCount);
 		_lods = new LOD[_lodCount];
 		var position = input.Position;
 		for (var m = 0; m < _lodCount; m++) {
