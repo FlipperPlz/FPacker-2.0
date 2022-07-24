@@ -28,19 +28,19 @@ public class RapArray : RapValue<List<IRapValue>> {
                 case RapString rapString:
                     writer.Write((byte) RapValueType.String);
                     rapString.ToBinaryContext(writer);
-                    return;
+                    break;
                 case RapInt rapInt:
                     writer.Write((byte) RapValueType.Long);
                     rapInt.ToBinaryContext(writer);
-                    return;
+                    break;
                 case RapFloat rapFloat:
                     writer.Write((byte) RapValueType.Float);
                     rapFloat.ToBinaryContext(writer);
-                    return;
+                    break;
                 case RapArray rapArray:
                     writer.Write((byte) RapValueType.Array);
                     rapArray.ToBinaryContext(writer);
-                    return;
+                    break;
                 default:
                     throw new Exception();
             }
