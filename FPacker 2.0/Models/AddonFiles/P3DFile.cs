@@ -16,55 +16,8 @@ public class P3DFile : BaseAddonFileSerializable<P3D.Models.P3D> {
 
     public P3DFile(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath, systemPath) { }
 
-    public void ObfuscatePaths(string obfuscatedPboPath, string obfuscatedPboRefPath) {
-        ObfuscatedPBOPath = obfuscatedPboPath;
-        ObfuscatedPBORefPath = obfuscatedPboRefPath;
-        switch (ObjectBase) {
-            case ODOL odolP3d:
-                throw new NotImplementedException("FPacker does not support the obfuscation of binarized models due to theft.");
-                foreach (var odolLod in odolP3d.LODs) {
-                    if(odolLod is not LOD lod) continue;
-                    foreach (var embeddedMaterial in lod.Materials) {
-                        var materialFile = embeddedMaterial.MaterialName.TrimStart('"').TrimEnd('"');
-                        var surfaceFile = embeddedMaterial.SurfaceFile.TrimStart('"').TrimEnd('"');
-                        
-                        if (ObfuscatedPaths.ContainsKey(materialFile)) embeddedMaterial.MaterialName = ObfuscatedPaths[materialFile];
-                        if (ObfuscatedPaths.ContainsKey(surfaceFile)) embeddedMaterial.MaterialName = ObfuscatedPaths[surfaceFile];
-                        
-                        foreach (var stageTexture in embeddedMaterial.StageTextures) {
-                            var textureName = stageTexture.Texture.TrimStart('"').TrimEnd('"');
-                            if (ObfuscatedPaths.ContainsKey(textureName)) stageTexture.Texture = ObfuscatedPaths[textureName];
-                        }
-                    }
-                }
-                break;
-            case MLOD mlodP3d:
-                foreach (var lod in mlodP3d.LODs) {
-                    if (lod is not MLOD_LOD mlodLod) continue;
-                    foreach (var face in mlodLod.Faces) {
-                        var textureName = face.Texture;
-                        var materialFile = face.Material;
-
-                        if (textureName != string.Empty && ObfuscatedPaths.TryGetValue(textureName, out var obfTextureName)) {
-                            face.Texture = obfTextureName;
-                        }
-
-                        if (materialFile != string.Empty && ObfuscatedPaths.TryGetValue(materialFile, out var obfMaterialFile)) {
-                            face.Material = obfMaterialFile;
-                        }
-                    }
-
-                    foreach (var tagg in mlodLod.Taggs) {
-                        if(!tagg.Name.ToLower().StartsWith("proxy:\\")) continue;
-                        try { tagg.Name = "proxy:\\" + ObfuscatedPaths[tagg.Name[7..]]; } catch (Exception e) { }
-                    }
-                }
-                break;
-        }
-    }
-
-    protected override void ParseObject(Stream data) {
-        ObjectBase = P3D.Models.P3D.GetInstance(data);
+    protected override void InitializeObject(Stream stream) {
+        ObjectBase = P3D.Models.P3D.GetInstance(stream);
         switch (ObjectBase) {
             case ODOL odolP3d:
                 throw new NotImplementedException("FPacker does not support the obfuscation of binarized models due to theft.");
@@ -120,4 +73,48 @@ public class P3DFile : BaseAddonFileSerializable<P3D.Models.P3D> {
         FoundPaths.AddRange(TexturePaths);
     }
 
+    public override void ObfuscateObject() {
+        switch (ObjectBase) {
+            case ODOL odolP3d:
+                throw new NotImplementedException("FPacker does not support the obfuscation of binarized models due to theft.");
+                foreach (var odolLod in odolP3d.LODs) {
+                    if(odolLod is not LOD lod) continue;
+                    foreach (var embeddedMaterial in lod.Materials) {
+                        var materialFile = embeddedMaterial.MaterialName.TrimStart('"').TrimEnd('"');
+                        var surfaceFile = embeddedMaterial.SurfaceFile.TrimStart('"').TrimEnd('"');
+                        
+                        if (ObfuscatedPaths.ContainsKey(materialFile)) embeddedMaterial.MaterialName = ObfuscatedPaths[materialFile];
+                        if (ObfuscatedPaths.ContainsKey(surfaceFile)) embeddedMaterial.MaterialName = ObfuscatedPaths[surfaceFile];
+                        
+                        foreach (var stageTexture in embeddedMaterial.StageTextures) {
+                            var textureName = stageTexture.Texture.TrimStart('"').TrimEnd('"');
+                            if (ObfuscatedPaths.ContainsKey(textureName)) stageTexture.Texture = ObfuscatedPaths[textureName];
+                        }
+                    }
+                }
+                break;
+            case MLOD mlodP3d:
+                foreach (var lod in mlodP3d.LODs) {
+                    if (lod is not MLOD_LOD mlodLod) continue;
+                    foreach (var face in mlodLod.Faces) {
+                        var textureName = face.Texture;
+                        var materialFile = face.Material;
+
+                        if (textureName != string.Empty && ObfuscatedPaths.TryGetValue(textureName, out var obfTextureName)) {
+                            face.Texture = obfTextureName;
+                        }
+
+                        if (materialFile != string.Empty && ObfuscatedPaths.TryGetValue(materialFile, out var obfMaterialFile)) {
+                            face.Material = obfMaterialFile;
+                        }
+                    }
+
+                    foreach (var tagg in mlodLod.Taggs) {
+                        if(!tagg.Name.ToLower().StartsWith("proxy:\\")) continue;
+                        try { tagg.Name = "proxy:\\" + ObfuscatedPaths[tagg.Name[7..]]; } catch (Exception e) { }
+                    }
+                }
+                break;
+        }
+    }
 }

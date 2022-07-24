@@ -16,10 +16,4 @@
       <PackageReference Include="NLog.Extensions.Logging" Version="5.0.1" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Formats\CPP\Models" />
-      <Folder Include="Formats\RAP\Enums" />
-      <Folder Include="Formats\RVMAT\Models" />
-    </ItemGroup>
-
 </Project>

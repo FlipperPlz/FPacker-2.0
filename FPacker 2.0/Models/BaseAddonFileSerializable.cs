@@ -13,10 +13,8 @@ public abstract class BaseAddonFileSerializable<TObj> : BaseAddonFile {
     
     protected BaseAddonFileSerializable(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath,
         systemPath) {
-        ParseObject(File.OpenRead(systemPath));
+        InitializeObject(File.OpenRead(systemPath));
     }
-
-    protected abstract void ParseObject(Stream data);
-    
-    public override IEnumerable<byte> Data { get; set; }
+    protected abstract void InitializeObject(Stream stream);
+    public abstract void ObfuscateObject();
 }

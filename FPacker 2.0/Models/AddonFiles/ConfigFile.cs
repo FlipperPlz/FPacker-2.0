@@ -8,7 +8,7 @@ using FPacker.Models;
 
 namespace FPacker.Models.AddonFiles; 
 
-class ConfigFileSerializable : BaseAddonFileSerializable<RapFile> {
+public class ConfigFile : BaseAddonFileSerializable<RapFile> {
     public string PBOConfigRoot { get; private set; }
     public string SystemConfigRoot { get; private set; }
     public string ObfuscatedPBOConfigRoot { get; private set; }
@@ -28,19 +28,17 @@ class ConfigFileSerializable : BaseAddonFileSerializable<RapFile> {
     public List<string> MissionScriptPaths = new();
     
     public List<string> FoundPaths = new();
-    
-    public List<EnforceFileSerializable> ReferencedScripts = new();
 
 
 
     public Dictionary<string, string> ObfuscatedPaths { get; private set; } = new();
 
-    public ConfigFileSerializable(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath, systemPath) {
+    public ConfigFile(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath, systemPath) {
     }
 
     
-    protected override void ParseObject(Stream stream) {
-        var lexer = new PoseidonLexer(CharStreams.fromStream(stream));
+    protected override void InitializeObject(Stream fileStream) {
+        var lexer = new PoseidonLexer(CharStreams.fromStream(RapFile.OpenStream(fileStream).WriteToStream()));
         var parser = new PoseidonParser(new CommonTokenStream(lexer));
         var listener = new ConfigPreParser();
         new ParseTreeWalker().Walk(listener, parser.computationalUnit());
@@ -70,38 +68,15 @@ class ConfigFileSerializable : BaseAddonFileSerializable<RapFile> {
         FoundPaths.AddRange(SoundSamplePaths);
 
     }
-
-
-    public void ObfuscatePaths(string newPath) {
-        if(!PBOPath.StartsWith("config")) PBOPath = newPath;
-        
+    
+    public override void ObfuscateObject() {
         var lexer = new PoseidonLexer(CharStreams.fromPath(SystemPath));
         var tokens = new CommonTokenStream(lexer);
         var parser = new PoseidonParser(tokens);
         var rewriter = new TokenStreamRewriter(tokens);
-        var listener = new ConfigObfuscationListener() { Rewriter = rewriter, ObfuscatedPaths = ObfuscatedPaths, EnforceFiles = ReferencedScripts};
+        var listener = new ConfigObfuscationListener() { Rewriter = rewriter, ObfuscatedPaths = ObfuscatedPaths};
         new ParseTreeWalker().Walk(listener, parser.computationalUnit());
-        
-        ResetData(rewriter.GetText());
-    }
-    
-    private void ResetData(string getText) {
-        var lexer = new PoseidonLexer(CharStreams.fromString(getText));
-        var tokens = new CommonTokenStream(lexer);
-
-        var parser = new PoseidonParser(tokens);
-
-        var listener = new ConfigPreParser();
-        new ParseTreeWalker().Walk(listener, parser.computationalUnit());
-        ObjectBase = listener.ConfigFile;
-        ModelPaths = listener.ModelPaths;
-        TexturePaths = listener.TexturePaths;
-        MaterialPaths = listener.MaterialPaths;
-        SoundSamplePaths = listener.SoundSamplePaths;
-        FoundPaths.AddRange(ModelPaths);
-        FoundPaths.AddRange(TexturePaths);
-        FoundPaths.AddRange(MaterialPaths);
-        FoundPaths.AddRange(SoundSamplePaths);
+        ObjectBase = RapFile.FromString(rewriter.GetText());
     }
 
 }

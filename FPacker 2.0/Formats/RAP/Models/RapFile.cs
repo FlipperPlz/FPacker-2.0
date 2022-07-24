@@ -5,7 +5,6 @@ using FPacker.Antlr.Poseidon;
 using FPacker.Formats.CPP.Parse;
 using FPacker.Formats.RAP.IO;
 using FPacker.Formats.RAP.Models.Enums;
-using FPacker.Formats.RAP.Models.Values;
 
 namespace FPacker.Formats.RAP.Models; 
 
@@ -225,14 +224,30 @@ public class RapFile : IRapEntry {
 
     #endregion
     
-    public void BinarizeToFile(string filePath) {
-        using var fs = File.OpenWrite(filePath);
-        using var writer = new RapBinaryWriter(fs);
+    public void BinarizeToFile(string filePath) => BinarizeToStream(File.OpenWrite(filePath));
+    public Stream BinarizeToStream() => BinarizeToStream(new MemoryStream());
+    
+    public Stream BinarizeToStream(Stream stream) {
+        using var writer = new RapBinaryWriter(stream);
         ToBinaryContext(writer);
+        return stream;
     }
+    
+    public void WriteToFile(string filePath) => File.WriteAllText(filePath, ToRapFormat());
+    public Stream WriteToStream() => WriteToStream(new MemoryStream());
 
-    public static RapFile OpenFile(string filePath) {
-        using (var reader = new RapBinaryReader(File.ReadAllBytes(filePath))) {
+    public Stream WriteToStream(Stream stream) { 
+        var writer = new StreamWriter(stream);
+        writer.Write(ToRapFormat());
+        writer.Flush();
+        writer.Close();
+        return stream;
+    }
+    
+    public static RapFile OpenFile(string filePath) => OpenStream(File.OpenRead(filePath));
+
+    public static RapFile OpenStream(Stream fileStream) {
+        using (var reader = new RapBinaryReader(fileStream)) {
 
             if (reader.ReadHeader()) {
                 reader.Position -= 4;
@@ -242,7 +257,16 @@ public class RapFile : IRapEntry {
         };
         
         
-        var lexer = new PoseidonLexer(CharStreams.fromPath(filePath));
+        var lexer = new PoseidonLexer(CharStreams.fromStream(fileStream));
+        var tokens = new CommonTokenStream(lexer);
+        var parser = new PoseidonParser(tokens);
+        var listener = new ConfigPreParser();
+        new ParseTreeWalker().Walk(listener, parser.computationalUnit());
+        return listener.ConfigFile;
+    }
+
+    public static RapFile FromString(string cfgString) {
+        var lexer = new PoseidonLexer(CharStreams.fromString(cfgString));
         var tokens = new CommonTokenStream(lexer);
         var parser = new PoseidonParser(tokens);
         var listener = new ConfigPreParser();

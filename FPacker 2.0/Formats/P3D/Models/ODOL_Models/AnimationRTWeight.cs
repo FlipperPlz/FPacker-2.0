@@ -1,12 +1,12 @@
 ﻿namespace FPacker.P3D.Models.ODOL; 
 
 public class AnimationRTWeight : VerySmallArray {
-    public AnimationRTPair[] AnimationRTPairs
+    public IEnumerable<AnimationRTPair> AnimationRTPairs
     {
         get
         {
-            AnimationRTPair[] array = new AnimationRTPair[this.NSmall];
-            for (int i = 0; i < this.NSmall; i++)
+            var array = new AnimationRTPair[this.NSmall];
+            for (var i = 0; i < this.NSmall; i++)
             {
                 array[i] = new AnimationRTPair(this.SmallSpace[i * 2], this.SmallSpace[i * 2 + 1]);
             }

@@ -14,11 +14,28 @@ using FPacker.Formats.Enforce.Parse;
 
 namespace FPacker.Models.AddonFiles; 
 
-public class EnforceFileSerializable : BaseAddonFileSerializable<EnforceScript> {
+public class EnforceFile : BaseAddonFileSerializable<EnforceScript> {
     public List<int> Modules { get; set; }
     
+    private void ResetData(string getText) {
+        var lexer = new EnforceLexer(CharStreams.fromString(getText));
+        var parser = new EnforceParser(new CommonTokenStream(lexer));
+        var listener = new EnforcePreParser();
+        new ParseTreeWalker().Walk(listener, parser.computationalUnit());
+        ObjectBase = listener.Script;
+    }
+
+    public EnforceFile(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath, systemPath) { }
     
-    public void ObfuscateScripts() {
+    protected override void InitializeObject(Stream stream) {
+        var lexer = new EnforceLexer(CharStreams.fromPath(SystemPath));
+        var parser = new EnforceParser(new CommonTokenStream(lexer));
+        var listener = new EnforcePreParser();
+        new ParseTreeWalker().Walk(listener, parser.computationalUnit());
+        ObjectBase = listener.Script;
+    }
+
+    public override void ObfuscateObject() {
         var lexer = new EnforceLexer(CharStreams.fromString(ObjectBase.ToEnforceFormat()));
         var tokens = new CommonTokenStream(lexer);
         var rewriter = new TokenStreamRewriter(tokens);
@@ -28,23 +45,6 @@ public class EnforceFileSerializable : BaseAddonFileSerializable<EnforceScript> 
         new ParseTreeWalker().Walk(listener, parser.computationalUnit());
 
         ResetData(rewriter.GetText());
-    }
-
-    private void ResetData(string getText) {
-        var lexer = new EnforceLexer(CharStreams.fromString(getText));
-        var parser = new EnforceParser(new CommonTokenStream(lexer));
-        var listener = new EnforcePreParser();
-        new ParseTreeWalker().Walk(listener, parser.computationalUnit());
-        ObjectBase = listener.Script;
-    }
-
-    public EnforceFileSerializable(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath, systemPath) { }
-    protected override void ParseObject(Stream data) {
-        var lexer = new EnforceLexer(CharStreams.fromPath(SystemPath));
-        var parser = new EnforceParser(new CommonTokenStream(lexer));
-        var listener = new EnforcePreParser();
-        new ParseTreeWalker().Walk(listener, parser.computationalUnit());
-        ObjectBase = listener.Script;
     }
 }
 

@@ -8,16 +8,10 @@
 
 namespace FPacker.Models; 
 
-public abstract class BaseAddonFile : IAddonFile {
+public interface IAddonFile {
     public string PBOPath { get; set; }
     public string PBOReferencePath { get; init; }
     public string ObfuscatedPBOPath { get; set; }
     public string ObfuscatedPBORefPath { get; set; }
     public string SystemPath { get; init; }
-    
-    public BaseAddonFile(string pboPath, string pboRefPath, string systemPath) {
-        PBOPath = pboPath;
-        PBOReferencePath = pboRefPath;
-        SystemPath = systemPath;
-    }
 }
