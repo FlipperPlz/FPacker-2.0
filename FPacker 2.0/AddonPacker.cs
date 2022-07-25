@@ -2,6 +2,8 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using FPacker.Formats.RAP.Models;
+using FPacker.Formats.RAP.Models.Values;
 using FPacker.Models.AddonFiles;
 using FPacker.P3D.Models;
 using FPacker.P3D.Models.MLOD;
@@ -11,6 +13,7 @@ using FPacker.PBO.Enums;
 using FPacker.PBO.Models;
 using NLog;
 using NLog.Config;
+using NLog.Fluent;
 using static System.String;
 
 namespace FPacker;
@@ -34,8 +37,7 @@ public struct AddonFile {
 }
 
 public class AddonPacker {
-
-    private static readonly Logger Logger = LogManager.GetLogger("FPacker");
+    public static readonly Logger Logger = LogManager.GetLogger("FPacker");
     
     private readonly string _srcFolder;
     private readonly List<AddonPrefix> _prefixes = new();
@@ -61,20 +63,235 @@ public class AddonPacker {
         InitializeLogger();
         Logger.Info("Parsing configs in {srcFolder}.", sourceFolder);
 
-        foreach (var file in new DirectoryInfo(sourceFolder).GetFiles("config.*", SearchOption.AllDirectories)) {
+        foreach (var file in new DirectoryInfo(sourceFolder).GetFiles("config.cpp", SearchOption.AllDirectories)) {
             Logger.Info("Parsing config: {fileName}", file.FullName);
             var pboPath = PBOUtilities.GetRelativePath(sourceFolder, file.FullName);
             var cfg = new ConfigFile(pboPath, file.FullName, file.FullName);
             _configs.Add(cfg);
             _prefixes.AddRange(cfg.PrefixObjs);
         }
+        foreach (var config in _configs) {
+            config.MissionScriptPaths.ForEach(p => LoadScripts(p, 5));
+            config.WorldScriptPaths.ForEach(p => LoadScripts(p, 4));
+            config.EngineScriptPaths.ForEach(p => LoadScripts(p, 3));
+            config.GameLibScriptPaths.ForEach(p => LoadScripts(p, 2));
+            config.GameScriptPaths.ForEach(p => LoadScripts(p, 1));
+        }
+        
+        var entries = new List<PBOEntry>();
+
+        _configs.Add(new ConfigFile() {
+            PBOPath = PBOUtilities.RandomString(44, "", true),
+            ObjectBase = CreateModConfig()
+        });
+        
+        foreach (var configFile in _configs) {
+            configFile.ObfuscatedPaths = _obfuscatedPaths;
+            entries.Add(new PBOEntry( configFile.PBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.BinarizedPoseidonConfig, configFile.ObjectBase.BinarizedData(), configFile.SystemPath));
+        }
+
+        foreach (var script in _scripts) {
+            entries.Add(new PBOEntry( script.PBOPath, (int) EntryPackingType.Uncompressed, EntryDataType.BinarizedPoseidonConfig, Encoding.UTF8.GetBytes(script.ObjectBase.ToEnforceFormat()), script.SystemPath));
+
+        }
+
+        new PBOStream(File.OpenWrite(outPath)).WritePBO(entries);
+        
+        
+        
         
 
         Logger.Log(LogLevel.Info, JsonSerializer.Serialize(_prefixes.Select(static p => p.PrefixName)));
     }
 
-    private void InitializeLogger() {
+    private void LoadScripts(string referenceScriptPath, int module) {
+        var systemPath = ConvertPBORefPath2SystemPath(referenceScriptPath);
+        if (File.Exists(systemPath)) {
+            if(!_obfuscatedPaths.ContainsKey(referenceScriptPath)) _obfuscatedPaths.Add(referenceScriptPath, string.Empty);
+            Logger.Info($"Identified script path: {referenceScriptPath} -> {systemPath}");
+            var prefixRefPath = PBOUtilities.RandomString(500, "       \\\\\\", false, false);
+            var prefixName = PBOUtilities.RandomString(13, string.Empty, false, false);
+            var newFileName = PBOUtilities.RandomString(25, string.Empty, false, false);
+            
+            CreatePrefix(new AddonPrefix() {
+                PBOPath = prefixRefPath,
+                PrefixName = prefixName
+            });
+
+            if (_scripts.Select(static s => s.SystemPath).Contains(systemPath)) {
+                foreach (var enforceFile in _scripts.Where(s => s.SystemPath == systemPath)) {
+                    enforceFile.Modules.Add(module);
+                }
+                return;
+            }
+                
+            _scripts.Add(new EnforceFile(prefixRefPath + Path.DirectorySeparatorChar + newFileName,
+                prefixName + Path.DirectorySeparatorChar + newFileName, systemPath) {
+                Modules = new List<int>() {module}
+            });
+            
+
+        } else if (Directory.Exists(systemPath)) {
+            if(!_obfuscatedPaths.ContainsKey(referenceScriptPath)) _obfuscatedPaths.Add(referenceScriptPath, string.Empty);
+            Logger.Info($"Identified system folder path for {referenceScriptPath}, enumerating files.");
+
+            foreach (var scriptPath in new DirectoryInfo(systemPath).EnumerateFiles("*.c", SearchOption.AllDirectories)) {
+                var prefixRefPath = PBOUtilities.RandomString(500, "       \\\\\\", false, false);
+                var prefixName = PBOUtilities.RandomString(13, string.Empty, false, false);
+                var newFileName = PBOUtilities.RandomString(25, string.Empty, false, false);
+
+                CreatePrefix(new AddonPrefix() {
+                    PBOPath = prefixRefPath,
+                    PrefixName = prefixName
+                });
+
+                if (_scripts.Select(static s => s.SystemPath).Contains(scriptPath.FullName)) {
+                    foreach (var enforceFile in _scripts.Where(s => s.SystemPath == scriptPath.FullName)) {
+                        enforceFile.Modules.Add(module);
+                    }
+                    continue;
+                }
+                
+                _scripts.Add(new EnforceFile(prefixRefPath + Path.DirectorySeparatorChar + newFileName,
+                    prefixName + Path.DirectorySeparatorChar + newFileName, scriptPath.FullName) {
+                    Modules = new List<int>() {module}
+                });
+
+            }
+        }
+    }
+
+    private RapFile CreateModConfig() {
+        var enginePaths = new List<string>();
+        var gameLibPaths = new List<string>();
+        var gamePaths = new List<string>();
+        var worldPaths = new List<string>();
+        var missionPaths = new List<string>();
+
+        foreach (var script in _scripts) {
+            foreach (var module in script.Modules) {
+                switch (module) {
+                    case 1:
+                        enginePaths.Add(script.PBOReferencePath);
+                        continue;
+                    case 2:
+                        gameLibPaths.Add(script.PBOReferencePath);
+                        continue;
+                    case 3:
+                        gamePaths.Add(script.PBOReferencePath);
+                        continue;
+                    case 4:
+                        worldPaths.Add(script.PBOReferencePath);
+                        continue;
+                    case 5:
+                        missionPaths.Add(script.PBOReferencePath);
+                        continue;
+                }
+            }
+        }
+
+        return new RapFile() {
+            GlobalClasses = new List<RapClass>() {
+                new RapClass() {
+                    ClassName = "CfgMods",
+                    ChildClasses = new List<RapClass> {
+                        new RapClass() {
+                            ClassName = _prefixes.First().PrefixName,
+                            ChildClasses = new List<RapClass>() {
+                                new RapClass() {
+                                    ClassName = "defs",
+                                    ChildClasses = new List<RapClass>() {
+                                        new RapClass() {
+                                            ClassName = "engineScriptModule",
+                                            VariableStatements = new List<RapVariableStatement>() {
+                                                new RapVariableStatement() {
+                                                    VariableName = "value", VariableValue = new RapString(string.Empty)
+                                                },
+                                                new RapVariableStatement() {
+                                                    VariableName = "files", VariableValue = new RapArray(enginePaths)
+                                                }
+                                            }
+                                        },
+                                        new RapClass() {
+                                            ClassName = "gameLibScriptModule",
+                                            VariableStatements = new List<RapVariableStatement>() {
+                                                new RapVariableStatement() {
+                                                    VariableName = "value", VariableValue = new RapString(string.Empty)
+                                                },
+                                                new RapVariableStatement() {
+                                                    VariableName = "files", VariableValue = new RapArray(gameLibPaths)
+                                                }
+                                            }
+                                        },
+                                        new RapClass() {
+                                            ClassName = "gameScriptModule",
+                                            VariableStatements = new List<RapVariableStatement>() {
+                                                new RapVariableStatement() {
+                                                    VariableName = "value", VariableValue = new RapString(string.Empty)
+                                                },
+                                                new RapVariableStatement() {
+                                                    VariableName = "files", VariableValue = new RapArray(gamePaths)
+                                                }
+                                            }
+                                        },
+                                        new RapClass() {
+                                            ClassName = "worldScriptModule",
+                                            VariableStatements = new List<RapVariableStatement>() {
+                                                new RapVariableStatement() {
+                                                    VariableName = "value", VariableValue = new RapString(string.Empty)
+                                                },
+                                                new RapVariableStatement() {
+                                                    VariableName = "files", VariableValue = new RapArray(worldPaths)
+                                                }
+                                            }
+                                        },
+                                        new RapClass() {
+                                            ClassName = "missionScriptModule",
+                                            VariableStatements = new List<RapVariableStatement>() {
+                                                new RapVariableStatement() {
+                                                    VariableName = "value", VariableValue = new RapString(string.Empty)
+                                                },
+                                                new RapVariableStatement() {
+                                                    VariableName = "files", VariableValue = new RapArray(missionPaths)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+        private void InitializeLogger() {
         NLog.LogManager.Configuration = new XmlLoggingConfiguration(@"..\..\..\NLog.config",true);
+    }
+
+    public void CreatePrefix(AddonPrefix prefix) {
+        var prefixCfg = new RapFile {
+            GlobalClasses = new List<RapClass> {
+                new() {
+                    ClassName = "CfgPatches",
+                    ChildClasses = new List<RapClass>() {
+                        new() {
+                            ClassName = prefix.PrefixName,
+                            VariableStatements = new List<RapVariableStatement>() {
+                                new() {VariableName = "requiredAddons", VariableValue = new RapArray(new[] {"DZ_Data"})}
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        var r = new ConfigFile() {
+            PBOPath = prefix.PBOPath,
+            PBOReferencePath = prefix.PrefixName + Path.DirectorySeparatorChar,
+            ObjectBase = prefixCfg
+        };
+        _configs.Add(r);
     }
 
     private string? ConvertPBORefPath2SystemPath(string pboRefPath) {
@@ -244,8 +461,7 @@ internal static class PBOUtilities {
         var allowable = allowableChars.ToCharArray();
         var l = allowable.Length;
         var chars = new char[stringLength];
-        for (var i = 0; i < stringLength; i++)
-            chars[i] = allowable[rnd[i] % l];
+        for (var i = 0; i < stringLength; i++) chars[i] = allowable[rnd[i] % l];
 
         var generatedString = new string(chars);
         

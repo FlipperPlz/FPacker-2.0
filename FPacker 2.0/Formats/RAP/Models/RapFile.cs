@@ -234,29 +234,31 @@ public class RapFile : IRapEntry {
     }
     
     public void WriteToFile(string filePath) => File.WriteAllText(filePath, ToRapFormat());
-    public Stream WriteToStream() => WriteToStream(new MemoryStream());
 
-    public Stream WriteToStream(Stream stream) { 
+    public byte[] BinarizedData() {
+        var stream = new MemoryStream();
+        using (var writer = new RapBinaryWriter(stream)) {
+            ToBinaryContext(writer);
+        };
+
+        return stream.ToArray();
+    }
+    
+    public void WriteToStream(Stream stream) { 
         var writer = new StreamWriter(stream);
         writer.Write(ToRapFormat());
         writer.Flush();
         writer.Close();
-        return stream;
     }
     
     public static RapFile OpenFile(string filePath) => OpenStream(File.OpenRead(filePath));
 
     public static RapFile OpenStream(Stream fileStream) {
-        using (var reader = new RapBinaryReader(fileStream)) {
-
-            if (reader.ReadHeader()) {
-                reader.Position -= 4;
-                return new RapFile().FromBinaryContext<RapFile>(reader);
-            }
-            reader.Close();
-        };
-        
-        
+        using var reader = new RapBinaryReader(fileStream);
+        if (reader.ReadHeader()) {
+            reader.Position -= 4;
+            return new RapFile().FromBinaryContext<RapFile>(reader);
+        }
         var lexer = new PoseidonLexer(CharStreams.fromStream(fileStream));
         var tokens = new CommonTokenStream(lexer);
         var parser = new PoseidonParser(tokens);

@@ -15,6 +15,7 @@ public abstract class BaseAddonFileSerializable<TObj> : BaseAddonFile {
         systemPath) {
         InitializeObject(File.OpenRead(systemPath));
     }
+    public BaseAddonFileSerializable() { }
     protected abstract void InitializeObject(Stream stream);
     public abstract void ObfuscateObject();
 }

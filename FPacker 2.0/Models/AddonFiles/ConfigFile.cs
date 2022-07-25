@@ -31,14 +31,14 @@ public class ConfigFile : BaseAddonFileSerializable<RapFile> {
 
 
 
-    public Dictionary<string, string> ObfuscatedPaths { get; private set; } = new();
+    public Dictionary<string, string> ObfuscatedPaths { get; set; } = new();
 
-    public ConfigFile(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath, systemPath) {
-    }
+    public ConfigFile(string pboPath, string pboRefPath, string systemPath) : base(pboPath, pboRefPath, systemPath) { }
 
-    
+    public ConfigFile() { }
+
     protected override void InitializeObject(Stream fileStream) {
-        var lexer = new PoseidonLexer(CharStreams.fromStream(RapFile.OpenStream(fileStream).WriteToStream()));
+        var lexer = new PoseidonLexer(CharStreams.fromString(RapFile.OpenStream(fileStream).ToRapFormat()));
         var parser = new PoseidonParser(new CommonTokenStream(lexer));
         var listener = new ConfigPreParser();
         new ParseTreeWalker().Walk(listener, parser.computationalUnit());

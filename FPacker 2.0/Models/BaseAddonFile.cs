@@ -20,4 +20,7 @@ public abstract class BaseAddonFile : IAddonFile {
         PBOReferencePath = pboRefPath;
         SystemPath = systemPath;
     }
+    
+    public BaseAddonFile() { }
+
 }
