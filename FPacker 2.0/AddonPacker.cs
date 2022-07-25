@@ -70,7 +70,7 @@ public class AddonPacker {
             _configs.Add(cfg);
             _prefixes.AddRange(cfg.PrefixObjs);
         }
-        foreach (var config in _configs) {
+        foreach (var config in _configs.ToList()) {
             config.MissionScriptPaths.ForEach(p => LoadScripts(p, 5));
             config.WorldScriptPaths.ForEach(p => LoadScripts(p, 4));
             config.EngineScriptPaths.ForEach(p => LoadScripts(p, 3));
