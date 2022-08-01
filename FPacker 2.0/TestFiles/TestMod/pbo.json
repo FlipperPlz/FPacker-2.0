@@ -1,0 +1,15 @@
+{
+    "compress": {
+        "exclude": [
+        ],
+        "include": [
+            ".*"
+        ]
+    },
+    "headers": [
+        {
+            "name": "prefix",
+            "value": "TestMod"
+        }
+    ]
+}

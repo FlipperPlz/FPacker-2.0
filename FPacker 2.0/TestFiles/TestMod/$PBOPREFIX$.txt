@@ -1,0 +1,15 @@
+prefix=TestMod;
+Obfustrate=1;
+FileCollision=1;
+FileCollisionCnt=20;
+FakeFiles=0;
+ReNameFiles=0;
+Headers=0;
+FakeScripts=1;
+FakeScriptCnt=10;
+Includes=0;
+noCompress=0;
+ignoredFiles=old,bak,bat,gproj,cfg,sh,ps1,txt;
+ingoreCompress=ogg,p3d,mp3;
+BadCompression=1;
+

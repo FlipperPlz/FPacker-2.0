@@ -20,6 +20,11 @@
       <Folder Include="Formats\CPP\Models" />
       <Folder Include="Formats\RAP\Enums" />
       <Folder Include="Formats\RVMAT\Models" />
+      <Folder Include="TestFiles\" />
     </ItemGroup>
+
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+      <Exec Command="del /S /Q $(OutDir)\TestFiles&#xD;&#xA;xcopy /S /Y &quot;$(ProjectDir)TestFiles&quot; &quot;$(OutDir)\TestFiles&quot;" />
+    </Target>
 
 </Project>

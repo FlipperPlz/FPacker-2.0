@@ -4,21 +4,46 @@ using FPacker.Antlr.Poseidon;
 using FPacker.Formats.CPP.Parse;
 using FPacker.Formats.RAP.IO;
 using FPacker.Formats.RAP.Models;
-using FPacker.Formats.RAP.Models.Parse;
+//using FPacker.Formats.RAP.Models.Parse;
 
 namespace FPacker;
 
 public static class Program {
 
-    public static void Main() {
-        var x = ReadRap(
-            @"C:\Program Files (x86)\Steam\steamapps\workshop\content\221100\2273590683\Addons\RevGunstest\RevGunstest\Weapons\config-7.cpp");
-        x.BinarizeToFile(
-            @"C:\Program Files (x86)\Steam\steamapps\workshop\content\221100\2273590683\Addons\RevGunstest\RevGunstest\Weapons\fuckk");
-        var y = new RapBinaryParser(
-            @"C:\Program Files (x86)\Steam\steamapps\workshop\content\221100\2273590683\Addons\RevGunstest\RevGunstest\Weapons\fuckk").ParsedRapFile;
+    public static void Main(string[] args) {
+        if (args.Length == 0)
+        {
+            args = new[]
+            {
+                @"C:\Program Files (x86)\Steam\steamapps\workshop\content\221100\2273590683\Addons\RevGunstest\RevGunstest\Weapons\config-7.cpp",
+                @"TestFiles\TestMod\config.cpp",
+                @"TestFiles\TestMod\"
+            };
+        }
 
-        //new AddonPacker(@"C:\Program Files (x86)\Steam\steamapps\workshop\content\221100\2273590683\Addons\RevGuns\RevGuns", @"C:\Users\dev\Desktop\PlasmaMod.pbo");
+        for (int i = 0; i < args.Length; i++)
+        {            
+            if (!File.Exists(args[i]) && !Directory.Exists(args[i]))
+            {
+                Console.WriteLine($"{DateTime.Now} File/Directory does not exist: {args[i]}");
+                continue;
+            }
+            switch (args[i].Split(".").Last().ToLower())
+            {
+                case "cpp":
+                    var x = ReadRap(args[i]);
+                    x.BinarizeToFile(args[i].Replace("cpp", "bin"));
+                    break;
+                case "bin":
+                    //var y = new RapBinaryParser(args[i]).ParsedRapFile;
+                    break;
+                case "pbo":                    
+                    break;
+                default:
+                    new AddonPacker(args[i], $"{args[i]}.pbo");
+                    break;
+            }
+        }
     }
 
     public static RapFile ReadRap(string path) {
