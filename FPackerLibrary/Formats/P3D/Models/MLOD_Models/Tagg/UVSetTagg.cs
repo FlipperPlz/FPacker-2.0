@@ -1,7 +1,7 @@
-﻿using FPacker.P3D.IO;
-using FPacker.P3D.Math;
+﻿using FPackerLibrary.P3D.IO;
+using FPackerLibrary.P3D.Math;
 
-namespace FPacker.P3D.Models.MLOD.Tagg; 
+namespace FPackerLibrary.P3D.Models.MLOD.Tagg; 
 
 public class UVSetTagg : Tagg {
     public uint UVSetNr;

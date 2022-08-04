@@ -1,6 +1,6 @@
-﻿using FPacker.P3D.IO;
+﻿using FPackerLibrary.P3D.IO;
 
-namespace FPacker.P3D.Math; 
+namespace FPackerLibrary.P3D.Math; 
 
 public class Point : Vector3P {
     public PointFlags PointFlags { get; private set; }

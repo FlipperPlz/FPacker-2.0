@@ -1,4 +1,4 @@
-﻿namespace FPacker.P3D.Math; 
+﻿namespace FPackerLibrary.P3D.Math; 
 
 [Flags]
 public enum FaceFlags

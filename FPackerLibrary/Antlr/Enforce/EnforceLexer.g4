@@ -1,6 +1,6 @@
 lexer grammar EnforceLexer;
 
-@header { namespace FPacker.Antlr.Enforce; }
+@header { namespace FPackerLibrary.Antlr.Enforce; }
 
 SINGLE_LINE_COMMENT: '//' ~[\r\n]*           -> skip;
 EMPTY_DELIMITED_COMMENT: ('/*/' | '/**/')    -> skip;

@@ -1,6 +1,6 @@
-﻿using FPacker.P3D.Math;
+﻿using FPackerLibrary.P3D.Math;
 
-namespace FPacker.P3D.Models; 
+namespace FPackerLibrary.P3D.Models; 
 
 public abstract class P3D_LOD {
     public string Name => this.resolution.getLODName();

@@ -1,7 +1,7 @@
-﻿using FPacker.P3D.IO;
-using FPacker.P3D.Math;
+﻿using FPackerLibrary.P3D.IO;
+using FPackerLibrary.P3D.Math;
 
-namespace FPacker.P3D.Models.ODOL; 
+namespace FPackerLibrary.P3D.Models.ODOL; 
 
 public class Proxy : IDeserializable {
     

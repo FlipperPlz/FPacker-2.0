@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using FPacker.Compression;
-using FPacker.PBO.Enums;
+using FPackerLibrary.Compression;
+using FPackerLibrary.PBO.Enums;
 
-namespace FPacker.PBO.Models; 
+namespace FPackerLibrary.PBO.Models; 
 
 [SuppressMessage("ReSharper", "MemberCanBeInternal")]
 public class PBOEntry {

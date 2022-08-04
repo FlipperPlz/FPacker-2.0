@@ -1,10 +1,10 @@
 ﻿using System.Text;
 using Antlr4.Runtime;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.RAP.IO;
-using FPacker.Formats.RAP.Models.Enums;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.RAP.IO;
+using FPackerLibrary.Formats.RAP.Models.Enums;
 
-namespace FPacker.Formats.RAP.Models; 
+namespace FPackerLibrary.Formats.RAP.Models; 
 
 public class RapClass : IRapEntry {
     public string ClassName { get; set; }

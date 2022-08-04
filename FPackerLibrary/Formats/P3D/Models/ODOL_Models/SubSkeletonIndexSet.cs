@@ -1,6 +1,6 @@
-﻿using FPacker.P3D.IO;
+﻿using FPackerLibrary.P3D.IO;
 
-namespace FPacker.P3D.Models.ODOL; 
+namespace FPackerLibrary.P3D.Models.ODOL; 
 
 public class SubSkeletonIndexSet : IDeserializable {
     private int[] _subSkeletons;

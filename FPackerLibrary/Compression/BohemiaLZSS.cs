@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace FPacker.Compression;
+namespace FPackerLibrary.Compression;
 
 internal static class BohemiaLZSS {
     private const int PacketFormatUncompressed = 1;

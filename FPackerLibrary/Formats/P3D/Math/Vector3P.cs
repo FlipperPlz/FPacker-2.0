@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
-using FPacker.P3D.IO;
+using FPackerLibrary.P3D.IO;
 
-namespace FPacker.P3D.Math; 
+namespace FPackerLibrary.P3D.Math; 
 
 public class Vector3P : IDeserializable {
     

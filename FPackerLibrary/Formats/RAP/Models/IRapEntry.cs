@@ -6,6 +6,6 @@
 //  * permission of Ryann
 //  *******************************************************/
 
-namespace FPacker.Formats.RAP.Models; 
+namespace FPackerLibrary.Formats.RAP.Models; 
 
 public interface IRapEntry : IRapDeserializable { }

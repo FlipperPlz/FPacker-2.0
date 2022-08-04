@@ -1,6 +1,6 @@
-﻿using FPacker.P3D.Models;
+﻿using FPackerLibrary.P3D.Models;
 
-namespace FPacker.P3D.Math; 
+namespace FPackerLibrary.P3D.Math; 
 
 public static class Resolution {
 	private const float specialLod = 1E+15f;

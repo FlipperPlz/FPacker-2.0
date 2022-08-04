@@ -1,6 +1,6 @@
-﻿using FPacker.PBO.Enums;
+﻿using FPackerLibrary.PBO.Enums;
 
-namespace FPacker.PBO.Models; 
+namespace FPackerLibrary.PBO.Models; 
 
 public class PBOEnforceEntry : PBOEntry {
     

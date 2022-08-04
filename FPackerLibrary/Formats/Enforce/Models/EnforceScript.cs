@@ -7,9 +7,9 @@
 //  *******************************************************/
 
 using System.Text;
-using FPacker.Antlr.Enforce;
+using FPackerLibrary.Antlr.Enforce;
 
-namespace FPacker.Formats.Enforce.Models;
+namespace FPackerLibrary.Formats.Enforce.Models;
 
 public class EnforceScript : IEnforceDeserializable<EnforceParser.ComputationalUnitContext, EnforceScript> {
     public List<EnforceVariable> GlobalFields { get; set; }

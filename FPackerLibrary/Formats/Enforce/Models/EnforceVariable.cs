@@ -8,9 +8,9 @@
 
 using System.Text;
 using Antlr4.Runtime.Misc;
-using FPacker.Antlr.Enforce;
+using FPackerLibrary.Antlr.Enforce;
 
-namespace FPacker.Formats.Enforce.Models; 
+namespace FPackerLibrary.Formats.Enforce.Models; 
 
 public class EnforceVariable : IEnforceDeserializable<EnforceParser.FieldDeclarationContext, EnforceVariable>, IEnforceSerializable {
     public List<string> VariableModifiers { get; set; }

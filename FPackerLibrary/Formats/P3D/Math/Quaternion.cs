@@ -1,4 +1,4 @@
-﻿namespace FPacker.P3D.Math;
+﻿namespace FPackerLibrary.P3D.Math;
 
 public class Quaternion {
 	public float X => this.x;

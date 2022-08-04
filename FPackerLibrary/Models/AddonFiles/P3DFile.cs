@@ -1,7 +1,7 @@
-﻿using FPacker.P3D.Models.MLOD;
-using FPacker.P3D.Models.ODOL;
+﻿using FPackerLibrary.P3D.Models.MLOD;
+using FPackerLibrary.P3D.Models.ODOL;
 
-namespace FPacker.Models.AddonFiles; 
+namespace FPackerLibrary.Models.AddonFiles; 
 
 public class P3DFile : BaseAddonFileSerializable<P3D.Models.P3D> {
     public List<string> MaterialPaths { get; private set; } = new();

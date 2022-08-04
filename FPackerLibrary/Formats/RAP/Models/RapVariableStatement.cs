@@ -1,11 +1,11 @@
 ﻿using System.Text;
 using Antlr4.Runtime;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.RAP.IO;
-using FPacker.Formats.RAP.Models.Enums;
-using FPacker.Formats.RAP.Models.Values;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.RAP.IO;
+using FPackerLibrary.Formats.RAP.Models.Enums;
+using FPackerLibrary.Formats.RAP.Models.Values;
 
-namespace FPacker.Formats.RAP.Models;
+namespace FPackerLibrary.Formats.RAP.Models;
 
 public class RapVariableStatement : IRapEntry {
     public string VariableName { get; set; }

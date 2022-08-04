@@ -1,11 +1,11 @@
 ﻿using System.Text;
 using Antlr4.Runtime;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.RAP.IO;
-using FPacker.Formats.RAP.Models.Enums;
-using FPacker.P3D.IO;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.RAP.IO;
+using FPackerLibrary.Formats.RAP.Models.Enums;
+using FPackerLibrary.P3D.IO;
 
-namespace FPacker.Formats.RAP.Models.Values; 
+namespace FPackerLibrary.Formats.RAP.Models.Values; 
 
 public class RapArray : RapValue<List<IRapValue>> {
     

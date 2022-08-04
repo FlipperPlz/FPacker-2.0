@@ -1,8 +1,8 @@
-﻿using FPacker.P3D.IO;
-using FPacker.P3D.Math;
-using FPacker.P3D.Models.MLOD.Tagg;
+﻿using FPackerLibrary.P3D.IO;
+using FPackerLibrary.P3D.Math;
+using FPackerLibrary.P3D.Models.MLOD.Tagg;
 
-namespace FPacker.P3D.Models.MLOD; 
+namespace FPackerLibrary.P3D.Models.MLOD; 
 
 public class MLOD_LOD : P3D_LOD {
     private uint _unk1;

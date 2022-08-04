@@ -1,6 +1,6 @@
 grammar Poseidon;
 
-@header { namespace FPacker.Antlr.Poseidon; }
+@header { namespace FPackerLibrary.Antlr.Poseidon; }
 
 computationalUnit: (classDefinition | statement)* | EOF;
 

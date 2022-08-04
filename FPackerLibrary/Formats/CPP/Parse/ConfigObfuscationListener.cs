@@ -1,10 +1,10 @@
 ﻿using Antlr4.Runtime;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.Enforce.Models;
-using FPacker.Formats.RAP.Models.Values;
-using FPacker.Models.AddonFiles;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.Enforce.Models;
+using FPackerLibrary.Formats.RAP.Models.Values;
+using FPackerLibrary.Models.AddonFiles;
 
-namespace FPacker.Formats.CPP.Parse;
+namespace FPackerLibrary.Formats.CPP.Parse;
 
 public class ConfigObfuscationListener : PoseidonBaseListener {
     internal TokenStreamRewriter Rewriter { get; init; }

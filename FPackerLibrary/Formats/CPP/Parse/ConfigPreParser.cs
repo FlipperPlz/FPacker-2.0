@@ -1,9 +1,9 @@
 ﻿using Antlr4.Runtime.Misc;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.RAP.Models;
-using FPacker.Formats.RAP.Models.Values;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.RAP.Models;
+using FPackerLibrary.Formats.RAP.Models.Values;
 
-namespace FPacker.Formats.CPP.Parse; 
+namespace FPackerLibrary.Formats.CPP.Parse; 
 
 public class ConfigPreParser : PoseidonBaseListener {
     public RapFile ConfigFile;

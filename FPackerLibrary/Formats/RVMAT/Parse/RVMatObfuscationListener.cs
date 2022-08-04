@@ -1,8 +1,8 @@
 ﻿using Antlr4.Runtime;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.RAP.Models.Values;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.RAP.Models.Values;
 
-namespace FPacker.Formats.RVMAT.Parse;
+namespace FPackerLibrary.Formats.RVMAT.Parse;
 
 public class RVMatObfuscationListener : PoseidonBaseListener {
     internal TokenStreamRewriter Rewriter { get; init; }

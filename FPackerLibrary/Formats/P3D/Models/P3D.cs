@@ -1,7 +1,7 @@
-﻿using FPacker.Antlr.Enforce;
-using FPacker.P3D.IO;
+﻿using FPackerLibrary.Antlr.Enforce;
+using FPackerLibrary.P3D.IO;
 
-namespace FPacker.P3D.Models; 
+namespace FPackerLibrary.P3D.Models; 
 
 public abstract class P3D {
     public uint Version { get; protected set; }

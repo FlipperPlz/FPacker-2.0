@@ -1,8 +1,8 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using FPacker.PBO.Models;
+using FPackerLibrary.PBO.Models;
 
-namespace FPacker.PBO; 
+namespace FPackerLibrary.PBO; 
 
 public class PBOStream {
     private readonly FileStream _stream;

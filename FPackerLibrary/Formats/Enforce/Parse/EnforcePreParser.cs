@@ -6,10 +6,10 @@
 //  * permission of Ryann
 //  *******************************************************/
 
-using FPacker.Antlr.Enforce;
-using FPacker.Formats.Enforce.Models;
+using FPackerLibrary.Antlr.Enforce;
+using FPackerLibrary.Formats.Enforce.Models;
 
-namespace FPacker.Formats.Enforce.Parse; 
+namespace FPackerLibrary.Formats.Enforce.Parse; 
 
 public class EnforcePreParser : EnforceParserBaseListener {
     public EnforceScript Script;

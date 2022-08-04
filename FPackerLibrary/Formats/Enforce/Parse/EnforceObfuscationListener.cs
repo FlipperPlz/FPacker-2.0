@@ -8,9 +8,9 @@
 
 using System.Security.Cryptography;
 using Antlr4.Runtime;
-using FPacker.Antlr.Enforce;
+using FPackerLibrary.Antlr.Enforce;
 
-namespace FPacker.Formats.Enforce.Parse; 
+namespace FPackerLibrary.Formats.Enforce.Parse; 
 
 public class EnforceObfuscationListener : EnforceParserBaseListener {
     internal TokenStreamRewriter Rewriter { get; init; }

@@ -1,4 +1,4 @@
-﻿namespace FPacker.Compression; 
+﻿namespace FPackerLibrary.Compression; 
 
 public class BohemiaLZO {
     public unsafe static uint decompress(byte* input, byte* output, uint expectedSize)

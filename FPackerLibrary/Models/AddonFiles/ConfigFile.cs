@@ -1,12 +1,12 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.CPP.Parse;
-using FPacker.Formats.Enforce.Models;
-using FPacker.Formats.RAP.Models;
-using FPacker.Models;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.CPP.Parse;
+using FPackerLibrary.Formats.Enforce.Models;
+using FPackerLibrary.Formats.RAP.Models;
+using FPackerLibrary.Models;
 
-namespace FPacker.Models.AddonFiles; 
+namespace FPackerLibrary.Models.AddonFiles; 
 
 class ConfigFileSerializable : BaseAddonFileSerializable<RapFile> {
     public string PBOConfigRoot { get; private set; }

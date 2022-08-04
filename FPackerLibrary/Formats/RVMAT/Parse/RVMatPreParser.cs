@@ -1,9 +1,9 @@
 ﻿using Antlr4.Runtime.Misc;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.RAP.Models;
-using FPacker.Formats.RAP.Models.Values;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.RAP.Models;
+using FPackerLibrary.Formats.RAP.Models.Values;
 
-namespace FPacker.Formats.RVMAT.Parse; 
+namespace FPackerLibrary.Formats.RVMAT.Parse; 
 
 public class RVMatPreParser : PoseidonBaseListener {
     public RapFile RvmatFile;

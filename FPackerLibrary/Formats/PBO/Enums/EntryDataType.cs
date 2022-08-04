@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace FPacker.PBO.Enums; 
+namespace FPackerLibrary.PBO.Enums; 
 
 [SuppressMessage("ReSharper", "InconsistentNaming")] //Acronym: RVMAT
 public enum EntryDataType {

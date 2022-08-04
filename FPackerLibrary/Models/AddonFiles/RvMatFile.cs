@@ -1,11 +1,11 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.RAP.Models;
-using FPacker.Formats.RVMAT.Parse;
-using FPacker.Models;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.RAP.Models;
+using FPackerLibrary.Formats.RVMAT.Parse;
+using FPackerLibrary.Models;
 
-namespace FPacker.Models.AddonFiles; 
+namespace FPackerLibrary.Models.AddonFiles; 
 
 public class RvMatFile : BaseAddonFileSerializable<RapFile> {
 

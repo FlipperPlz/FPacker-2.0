@@ -1,8 +1,8 @@
 ﻿using Antlr4.Runtime;
-using FPacker.Formats.RAP.IO;
-using FPacker.P3D.IO;
+using FPackerLibrary.Formats.RAP.IO;
+using FPackerLibrary.P3D.IO;
 
-namespace FPacker.Formats.RAP.Models.Values; 
+namespace FPackerLibrary.Formats.RAP.Models.Values; 
 
 
 public abstract class RapValue<T> : IRapValue {

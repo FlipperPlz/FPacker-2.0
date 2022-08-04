@@ -1,7 +1,7 @@
-﻿using FPacker.P3D.IO;
+﻿using FPackerLibrary.P3D.IO;
 using NLog.Targets;
 
-namespace FPacker.P3D.Math;
+namespace FPackerLibrary.P3D.Math;
 
 public class Vector3PCompressed : IDeserializable {
     private int _value;

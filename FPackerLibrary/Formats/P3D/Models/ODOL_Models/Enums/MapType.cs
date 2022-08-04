@@ -1,4 +1,4 @@
-﻿namespace FPacker.P3D.Models.ODOL; 
+﻿namespace FPackerLibrary.P3D.Models.ODOL; 
 
 public enum MapType {
     MapTree,

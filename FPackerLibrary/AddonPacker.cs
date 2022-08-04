@@ -3,18 +3,18 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using FPacker.Models.AddonFiles;
-using FPacker.P3D.Models;
-using FPacker.P3D.Models.MLOD;
-using FPacker.P3D.Models.ODOL;
-using FPacker.PBO;
-using FPacker.PBO.Enums;
-using FPacker.PBO.Models;
+using FPackerLibrary.Models.AddonFiles;
+using FPackerLibrary.P3D.Models;
+using FPackerLibrary.P3D.Models.MLOD;
+using FPackerLibrary.P3D.Models.ODOL;
+using FPackerLibrary.PBO;
+using FPackerLibrary.PBO.Enums;
+using FPackerLibrary.PBO.Models;
 using NLog;
 using NLog.Config;
 using static System.String;
 
-namespace FPacker;
+namespace FPackerLibrary;
 
 struct AddonPrefix {
     public string SystemPath { get; set; } //This is the prefix root established by where the config is
@@ -58,7 +58,7 @@ public class AddonPacker {
     
     
     public AddonPacker(string sourceFolder, string outPath) {
-        InitializeLogger();
+        Statics.InitializeLogger();
         var tempPath = Path.Combine(Path.GetTempPath(), "FPacker", PBOUtilities.RandomString(10));
         if (sourceFolder.EndsWith("zip"))
         {            
@@ -307,10 +307,6 @@ public class AddonPacker {
         Logger.Log(LogLevel.Info, JsonSerializer.Serialize(_prefixes.Select(static p => p.PrefixName)));
 
         if (Directory.Exists(tempPath)) Directory.Delete(tempPath, true);
-    }
-
-    private void InitializeLogger() {
-        NLog.LogManager.Configuration = new XmlLoggingConfiguration(@"..\..\..\NLog.config",true);
     }
 
     private string? ConvertPBORefPath2SystemPath(string pboRefPath) {

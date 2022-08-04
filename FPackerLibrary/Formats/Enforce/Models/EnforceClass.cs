@@ -8,9 +8,9 @@
 
 using System.Text;
 using Antlr4.Runtime.Misc;
-using FPacker.Antlr.Enforce;
+using FPackerLibrary.Antlr.Enforce;
 
-namespace FPacker.Formats.Enforce.Models; 
+namespace FPackerLibrary.Formats.Enforce.Models; 
 
 //TODO: Type Support
 public class EnforceClass : IEnforceDeserializable<EnforceParser.ClassDeclarationContext, EnforceClass>, IEnforceSerializable {

@@ -1,8 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
-using FPacker.Compression;
+using FPackerLibrary.Compression;
 
-namespace FPacker.P3D.IO; 
+namespace FPackerLibrary.P3D.IO; 
 
 public class P3DBinaryReader : BinaryReader {
     public bool UseCompressionFlag { get; set; }

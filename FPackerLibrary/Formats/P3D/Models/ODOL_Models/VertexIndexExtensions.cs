@@ -1,6 +1,6 @@
-﻿using FPacker.P3D.IO;
+﻿using FPackerLibrary.P3D.IO;
 
-namespace FPacker.P3D.Models.ODOL; 
+namespace FPackerLibrary.P3D.Models.ODOL; 
 
 public static class VertexIndexExtensions {
     public static VertexIndex ReadVertexIndex(this P3DBinaryReader input) => input.Version >= 69 ? input.ReadInt32() : input.ReadUInt16();

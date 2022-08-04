@@ -1,6 +1,6 @@
 parser grammar EnforceParser;
 
-@header { namespace FPacker.Antlr.Enforce; }
+@header { namespace FPackerLibrary.Antlr.Enforce; }
 
 options { tokenVocab=EnforceLexer; }
 

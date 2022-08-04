@@ -7,11 +7,11 @@
 //  *******************************************************/
 
 using System.Text;
-using FPacker.Formats.RAP.Models;
-using FPacker.Formats.RAP.Models.Enums;
-using FPacker.Formats.RAP.Models.Values;
+using FPackerLibrary.Formats.RAP.Models;
+using FPackerLibrary.Formats.RAP.Models.Enums;
+using FPackerLibrary.Formats.RAP.Models.Values;
 
-namespace FPacker.Formats.RAP.IO; 
+namespace FPackerLibrary.Formats.RAP.IO; 
 
 public class RapBinaryReader : BinaryReader {
     public long Position {

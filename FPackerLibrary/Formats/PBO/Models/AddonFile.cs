@@ -6,7 +6,7 @@
 //  * permission of Ryann
 //  *******************************************************/
 
-namespace FPacker.PBO.Models; 
+namespace FPackerLibrary.PBO.Models; 
 
 public class AddonFile {
     public string PBOPath { get; init; }

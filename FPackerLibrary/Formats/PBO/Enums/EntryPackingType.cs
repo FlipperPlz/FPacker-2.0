@@ -1,4 +1,4 @@
-﻿namespace FPacker.PBO.Enums; 
+﻿namespace FPackerLibrary.PBO.Enums; 
 
 public enum EntryPackingType {
     Uncompressed = 0x00000000,

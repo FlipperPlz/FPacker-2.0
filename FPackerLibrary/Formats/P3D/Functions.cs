@@ -1,4 +1,4 @@
-﻿namespace FPacker.P3D; 
+﻿namespace FPackerLibrary.P3D; 
 
 public static class Functions {
     public static void Swap<T>(ref T v1, ref T v2) => (v1, v2) = (v2, v1);

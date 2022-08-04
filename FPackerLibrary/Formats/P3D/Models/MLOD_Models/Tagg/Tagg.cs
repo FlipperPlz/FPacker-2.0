@@ -1,4 +1,4 @@
-﻿namespace FPacker.P3D.Models.MLOD.Tagg; 
+﻿namespace FPackerLibrary.P3D.Models.MLOD.Tagg; 
 
 public class Tagg {
     public uint DataSize { get; set; }

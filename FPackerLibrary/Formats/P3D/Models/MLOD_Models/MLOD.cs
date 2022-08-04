@@ -1,6 +1,6 @@
-﻿using FPacker.P3D.IO;
+﻿using FPackerLibrary.P3D.IO;
 
-namespace FPacker.P3D.Models.MLOD; 
+namespace FPackerLibrary.P3D.Models.MLOD; 
 
 public class MLOD : P3D {
     public override P3D_LOD[] LODs => this.lods;

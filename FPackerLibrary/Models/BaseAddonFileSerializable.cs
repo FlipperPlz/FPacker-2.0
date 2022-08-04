@@ -6,7 +6,7 @@
 //  * permission of Ryann
 //  *******************************************************/
 
-namespace FPacker.Models; 
+namespace FPackerLibrary.Models; 
 
 public abstract class BaseAddonFileSerializable<TObj> : BaseAddonFile {
     public TObj ObjectBase;

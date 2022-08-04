@@ -6,10 +6,10 @@
 //  * permission of Ryann
 //  *******************************************************/
 
-using FPacker.Formats.RAP.Models;
-using FPacker.Formats.RAP.Models.Values;
+using FPackerLibrary.Formats.RAP.Models;
+using FPackerLibrary.Formats.RAP.Models.Values;
 
-namespace FPacker.Formats.RAP.IO; 
+namespace FPackerLibrary.Formats.RAP.IO; 
 
 public class RapBinaryWriter : BinaryWriter {
     public long Position {

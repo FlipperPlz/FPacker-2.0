@@ -1,10 +1,10 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.RAP.IO;
-using FPacker.Formats.RAP.Models.Enums;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.RAP.IO;
+using FPackerLibrary.Formats.RAP.Models.Enums;
 
-namespace FPacker.Formats.RAP.Models.Values; 
+namespace FPackerLibrary.Formats.RAP.Models.Values; 
 
 public class RapInt : RapValue<int> {
     public RapInt(int i) => Value = i;

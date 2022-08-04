@@ -8,11 +8,11 @@
 
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using FPacker.Antlr.Enforce;
-using FPacker.Formats.Enforce.Models;
-using FPacker.Formats.Enforce.Parse;
+using FPackerLibrary.Antlr.Enforce;
+using FPackerLibrary.Formats.Enforce.Models;
+using FPackerLibrary.Formats.Enforce.Parse;
 
-namespace FPacker.Models.AddonFiles; 
+namespace FPackerLibrary.Models.AddonFiles; 
 
 public class EnforceFileSerializable : BaseAddonFileSerializable<EnforceScript> {
     public List<int> Modules { get; set; }

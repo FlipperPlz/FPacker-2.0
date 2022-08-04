@@ -1,10 +1,10 @@
 ﻿using System.Text;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.RAP.IO;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.RAP.IO;
 
-namespace FPacker.Formats.RAP.Models; 
+namespace FPackerLibrary.Formats.RAP.Models; 
 
 public class RapDeleteStatement : IRapEntry { 
     public string Label { get; set; }

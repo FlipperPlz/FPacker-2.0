@@ -1,6 +1,6 @@
-﻿using FPacker.P3D.IO;
+﻿using FPackerLibrary.P3D.IO;
 
-namespace FPacker.P3D.Math;
+namespace FPackerLibrary.P3D.Math;
 
 public class Matrix4P {
     public Matrix3P Orientation;

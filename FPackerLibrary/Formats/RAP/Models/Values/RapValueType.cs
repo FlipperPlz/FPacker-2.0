@@ -6,7 +6,7 @@
 //  * permission of Ryann
 //  *******************************************************/
 
-namespace FPacker.Formats.RAP.Models.Enums; 
+namespace FPackerLibrary.Formats.RAP.Models.Enums; 
 
 public enum RapValueType : byte {
     String = 0,

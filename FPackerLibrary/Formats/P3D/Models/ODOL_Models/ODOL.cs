@@ -1,6 +1,6 @@
-﻿using FPacker.P3D.IO;
-using FPacker.P3D.Math;
-namespace FPacker.P3D.Models.ODOL;
+﻿using FPackerLibrary.P3D.IO;
+using FPackerLibrary.P3D.Math;
+namespace FPackerLibrary.P3D.Models.ODOL;
 
 public class ODOL : P3D {
 	public const int LatestVersion = 73;

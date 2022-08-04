@@ -19,7 +19,7 @@
 // Ambiguous reference in cref attribute
 #pragma warning disable 419
 
- namespace FPacker.Antlr.Enforce; 
+ namespace FPackerLibrary.Antlr.Enforce; 
 using System;
 using System.IO;
 using System.Text;

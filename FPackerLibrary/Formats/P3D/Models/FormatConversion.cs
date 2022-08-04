@@ -1,9 +1,9 @@
-﻿using FPacker.P3D.Math;
-using FPacker.P3D.Models.MLOD;
-using FPacker.P3D.Models.MLOD.Tagg;
-using FPacker.P3D.Models.ODOL;
+﻿using FPackerLibrary.P3D.Math;
+using FPackerLibrary.P3D.Models.MLOD;
+using FPackerLibrary.P3D.Models.MLOD.Tagg;
+using FPackerLibrary.P3D.Models.ODOL;
 
-namespace FPacker.P3D.Models; 
+namespace FPackerLibrary.P3D.Models; 
 
 public static class FormatConversion {
 

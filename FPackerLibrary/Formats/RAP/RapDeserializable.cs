@@ -1,7 +1,7 @@
 ﻿using Antlr4.Runtime;
-using FPacker.Formats.RAP.IO;
+using FPackerLibrary.Formats.RAP.IO;
 
-namespace FPacker.Formats.RAP.Models; 
+namespace FPackerLibrary.Formats.RAP.Models; 
 
 public interface IRapDeserializable : IRapSerializable {
     public Tself FromRapContext<Tself>(ParserRuleContext ctx) where Tself : IRapDeserializable;

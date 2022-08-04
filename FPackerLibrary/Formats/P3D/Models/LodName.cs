@@ -1,4 +1,4 @@
-﻿namespace FPacker.P3D.Models; 
+﻿namespace FPackerLibrary.P3D.Models; 
 
 public enum LodName {
     ViewGunner,

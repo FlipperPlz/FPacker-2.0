@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using FPacker.Formats.RAP.Models;
-using FPacker.PBO.Enums;
+using FPackerLibrary.Formats.RAP.Models;
+using FPackerLibrary.PBO.Enums;
 
-namespace FPacker.PBO.Models; 
+namespace FPackerLibrary.PBO.Models; 
 
 public class PBOConfigEntry : PBOEntry {
     private readonly RapFile _cfgObject;
