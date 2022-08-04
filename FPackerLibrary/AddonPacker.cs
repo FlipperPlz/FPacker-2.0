@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -33,7 +34,7 @@ struct AddonFile {
     public EntryDataType Type { get; set; }
 }
 
-internal class AddonPacker {
+public class AddonPacker {
 
     private static readonly Logger Logger = LogManager.GetLogger("FPacker");
     
@@ -55,10 +56,26 @@ internal class AddonPacker {
     private readonly List<AddonFile> _samples = new();
     private readonly List<P3DFile> _models = new();
     
-
-
+    
     public AddonPacker(string sourceFolder, string outPath) {
         InitializeLogger();
+        var tempPath = Path.Combine(Path.GetTempPath(), "FPacker", PBOUtilities.RandomString(10));
+        if (sourceFolder.EndsWith("zip"))
+        {            
+            using (var z = ZipFile.OpenRead(sourceFolder))
+            {
+                foreach (var entry in z.Entries)
+                {
+                    using (var r = new StreamReader(entry.Open()))
+                    {
+                        string uncompressedFile = Path.Combine(tempPath, entry.Name);
+                        File.WriteAllText(uncompressedFile, r.ReadToEnd());
+                    }
+                }
+            }
+            sourceFolder = tempPath;
+        }
+
         Logger.Info("Parsing configs in {srcFolder}.", sourceFolder);
 
         #region Parse all config.cpp files and gather referenced paths.
@@ -288,6 +305,8 @@ internal class AddonPacker {
         new PBOStream(File.Create(outPath)).WritePBO(entries);
 
         Logger.Log(LogLevel.Info, JsonSerializer.Serialize(_prefixes.Select(static p => p.PrefixName)));
+
+        if (Directory.Exists(tempPath)) Directory.Delete(tempPath, true);
     }
 
     private void InitializeLogger() {
