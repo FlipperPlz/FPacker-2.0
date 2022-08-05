@@ -408,7 +408,7 @@ public class AddonPacker {
     }
 }
  
-internal static class PBOUtilities {
+public static class PBOUtilities {
     // ReSharper disable once StringLiteralTypo
     private static string RecentFolderGUID = "{22877a6d-37a1-461a-91b0-dbda5aaebc99}";
     private const string BinarizeBatFileLocation = @"C:\Program Files (x86)\Steam\steamapps\common\DayZ Tools\Bin\CfgConvert\CPPToBIN.bat";

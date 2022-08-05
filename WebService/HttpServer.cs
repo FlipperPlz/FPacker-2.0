@@ -17,10 +17,12 @@ internal sealed class HttpServer : IDisposable
         //decoder.Add("home", new HomePageHandler());
         foreach (var page in Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HTML\\"), "*.html"))
         {
-            Console.WriteLine($"HTML\\{page.Split("\\").Last()} at {page.Split("/").Last().Replace(".html", "")}");
+            Console.WriteLine($"HTML\\{page.Split("\\").Last()} at {page.Split("\\").Last().Replace(".html", "")}");
             decoder.Add(page.Split("\\").Last().Replace(".html", ""), new DefaultPageHandler(page));
         }
-
+        // image of choosen device as a png
+        decoder.Add("files", new FileHandler());
+        
         // image of choosen device as a png
         decoder.Add("favicon.ico", new IconPageHandler());
 
@@ -131,7 +133,7 @@ internal sealed class HttpServer : IDisposable
                 AbstractPageHandler page;
                 var uri = context.Request.RawUrl.Split('/');
                 
-                var found = decoder.TryGetValue(uri[1], out page);
+                var found = decoder.TryGetValue(uri[1].Split('?').First(), out page);
                 if (!loggedIn)
                 {
                     // if not logged in display 401 page
@@ -143,9 +145,10 @@ internal sealed class HttpServer : IDisposable
                     page = decoder["404"];
                 }
 
+                
                 response = context.Response;
 
-                var buffer = page.HandleRequest(response, uri);
+                var buffer = page.HandleRequest(context.Request, response, uri);
 
                 // Get a response stream and write the response to it.
                 response.ContentLength64 = buffer.Length;

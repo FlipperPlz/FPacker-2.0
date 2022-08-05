@@ -29,7 +29,7 @@ internal class Program
     {
         //ApplicationConfiguration.Initialize();
         //Application.Run(new Form1());
-        Statics.InitializeLogger();
+        FPackerLibrary.Statics.InitializeLogger();
         // get configuration from command line parameters
 
         Configuration conf;

@@ -35,5 +35,5 @@ internal class IconPageHandler : AbstractPageHandler
     /// <param name="response"></param>
     /// <param name="uri"></param>
     /// <returns></returns>
-    public override byte[] HandleRequest(HttpListenerResponse response, string[] uri) => buffer;
+    public override byte[] HandleRequest(HttpListenerRequest request, HttpListenerResponse response, string[] uri) => buffer;
 }

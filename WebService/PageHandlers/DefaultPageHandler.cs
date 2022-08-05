@@ -23,7 +23,7 @@ internal class DefaultPageHandler : AbstractPageHandler
     /// <param name="response">not used</param>
     /// <param name="uri">raw URI tokenized by '/'</param>
     /// <returns>HTML page + javascript</returns>
-    public override byte[] HandleRequest(HttpListenerResponse response, string[] uri)
+    public override byte[] HandleRequest(HttpListenerRequest request, HttpListenerResponse response, string[] uri)
     {
         var staticPage = File.ReadAllText($"{fileName}");
         return BuildHTML(staticPage);

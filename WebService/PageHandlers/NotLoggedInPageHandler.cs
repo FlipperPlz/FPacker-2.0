@@ -12,7 +12,7 @@ internal class NotLoggedInPageHandler : AbstractPageHandler
     /// <param name="response"></param>
     /// <param name="uri"></param>
     /// <returns></returns>
-    public override byte[] HandleRequest(HttpListenerResponse response, string[] uri)
+    public override byte[] HandleRequest(HttpListenerRequest request, HttpListenerResponse response, string[] uri)
     {
         response.StatusCode = 401;
         return BuildHTML("Access denied!");

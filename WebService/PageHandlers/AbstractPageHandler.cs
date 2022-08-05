@@ -20,7 +20,7 @@ internal abstract class AbstractPageHandler
     /// <param name="response">response to be sent to client</param>
     /// <param name="uri">tokenized request URI</param>
     /// <returns>response body</returns>
-    public abstract byte[] HandleRequest(HttpListenerResponse response, string[] uri);
+    public abstract byte[] HandleRequest(HttpListenerRequest request, HttpListenerResponse response, string[] uri);
 
     /// <summary>
     ///     boilerplate HTML wraping for all the response streams
