@@ -60,21 +60,6 @@ public class AddonPacker {
     public AddonPacker(string sourceFolder, string outPath) {
         Statics.InitializeLogger();
         var tempPath = Path.Combine(Path.GetTempPath(), "FPacker", PBOUtilities.RandomString(10));
-        if (sourceFolder.EndsWith("zip"))
-        {            
-            using (var z = ZipFile.OpenRead(sourceFolder))
-            {
-                foreach (var entry in z.Entries)
-                {
-                    using (var r = new StreamReader(entry.Open()))
-                    {
-                        string uncompressedFile = Path.Combine(tempPath, entry.Name);
-                        File.WriteAllText(uncompressedFile, r.ReadToEnd());
-                    }
-                }
-            }
-            sourceFolder = tempPath;
-        }
 
         Logger.Info("Parsing configs in {srcFolder}.", sourceFolder);
 

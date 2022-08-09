@@ -30,4 +30,14 @@ internal abstract class AbstractPageHandler
     internal static byte[] BuildHTML(string content) =>
         Encoding.UTF8.GetBytes(
             $"<!doctype html>{Environment.NewLine}<head><title>FPacker</title></head>{Environment.NewLine}<body>{Environment.NewLine}{content}</body>{Environment.NewLine}</html>{Environment.NewLine}");
+
+    /// <summary>
+    ///     Get all params from uri
+    /// </summary>
+    /// <param name="uri"></param>
+    /// <returns>Dictionary<string, string></returns>    
+    internal static Dictionary<string, string> GetParams(string[] uri) => uri.Last().Split('?').Last().Split('&')
+        .Select(part => part.Split('='))
+        .Where(part => part.Length == 2)
+        .ToDictionary(sp => sp[0], sp => sp[1]);
 }

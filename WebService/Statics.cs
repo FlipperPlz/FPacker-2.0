@@ -111,5 +111,7 @@ namespace WebService
             }
             return -1;
         }
+
+        internal static KeyHandler keyHandler = new KeyHandler();
     }
 }
