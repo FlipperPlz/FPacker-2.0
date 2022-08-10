@@ -13,8 +13,9 @@ namespace WebService
             using var ms = GetStream(enc, boundary, input);
             if (ms.ToArray().Length == 0) return false;
 
-            using var output = new FileStream(targetPath, FileMode.Create, FileAccess.Write);            
-            ms.CopyTo(output);
+            using var output = new FileStream(targetPath, FileMode.Create, FileAccess.Write);
+            output.Write(ms.ToArray());
+            
             return true;
 
         }

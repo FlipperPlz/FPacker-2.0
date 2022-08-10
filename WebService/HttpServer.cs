@@ -151,7 +151,7 @@ internal sealed class HttpServer : IDisposable
                 var buffer = page.HandleRequest(context.Request, response, uri);
 
                 // Get a response stream and write the response to it.
-                response.ContentLength64 = buffer.Length;
+                if (response.ContentLength64 == 0) response.ContentLength64 = buffer.Length;
                 output = response.OutputStream;
                 output.Write(buffer, 0, buffer.Length);
             }
