@@ -1,12 +1,12 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using FPacker.Antlr.Poseidon;
-using FPacker.Formats.CPP.Parse;
-using FPacker.Formats.RAP.IO;
-using FPacker.Formats.RAP.Models;
-//using FPacker.Formats.RAP.Models.Parse;
+using FPackerLibrary.Antlr.Poseidon;
+using FPackerLibrary.Formats.CPP.Parse;
+using FPackerLibrary.Formats.RAP.IO;
+using FPackerLibrary.Formats.RAP.Models;
+//using FPackerLibrary.Formats.RAP.Models.Parse;
 
-namespace FPacker;
+namespace FPackerLibrary;
 
 public static class Program {
 

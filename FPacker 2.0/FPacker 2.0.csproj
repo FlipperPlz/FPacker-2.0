@@ -17,14 +17,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Formats\CPP\Models" />
-      <Folder Include="Formats\RAP\Enums" />
-      <Folder Include="Formats\RVMAT\Models" />
-      <Folder Include="TestFiles\" />
+      <ProjectReference Include="..\FPackerLibrary\FPackerLibrary.csproj" />
     </ItemGroup>
 
-    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-      <Exec Command="del /S /Q $(OutDir)\TestFiles&#xD;&#xA;xcopy /S /Y &quot;$(ProjectDir)TestFiles&quot; &quot;$(OutDir)\TestFiles&quot;" />
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="del /S /Q $(OutDir)\TestFiles || set errorlevel=0&#xD;&#xA;xcopy /S /Y &quot;$(ProjectDir)TestFiles&quot; &quot;$(OutDir)\TestFiles&quot; || set errorlevel=0" />
     </Target>
 
 </Project>
