@@ -8,10 +8,11 @@ namespace WebService
 {
     internal class KeyHandler
     {
-        private static List<string> ValidKeys;
+        private static List<string> ValidKeys = new(){ "7289B39D-8BF4-43E8-982A-CFFA518E04BD" };
         internal bool isKeyValid(string key)
         {
-            return true;
+            if (ValidKeys.Contains(key)) return true;
+            return false;
         }
     }
 }

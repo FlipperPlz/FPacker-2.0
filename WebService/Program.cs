@@ -4,12 +4,9 @@ using System.Net;
 using System.Threading;
 using System.Windows.Forms;
 using NLog;
-using NLog.Web;
 using NLog.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Hosting;
 using NLog.Extensions.Logging;
-using Microsoft.AspNetCore.Hosting;
 using FPackerLibrary;
 
 namespace WebService;

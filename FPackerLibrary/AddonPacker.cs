@@ -57,8 +57,10 @@ public class AddonPacker {
     private readonly List<P3DFile> _models = new();
     
     
-    public AddonPacker(string sourceFolder, string outPath) {
+    public AddonPacker(string sourceFolder, string outPath, Settings settings = null) {
         Statics.InitializeLogger();
+        if (settings != null) Statics.settings = settings;
+
         var tempPath = Path.Combine(Path.GetTempPath(), "FPacker", PBOUtilities.RandomString(10));
 
         Logger.Info("Parsing configs in {srcFolder}.", sourceFolder);
@@ -143,34 +145,40 @@ public class AddonPacker {
 
         #endregion
        
-
-        foreach (var modelPath in _foundModelPaths) {
+        if (Statics.settings.P3D)        
+        foreach (var modelPath in _foundModelPaths)
+        {
             var pboRefPath = SanitizePBOPath(modelPath);
             var systemPath = ConvertPBORefPath2SystemPath(pboRefPath);
-            if(systemPath is null || !File.Exists(systemPath)) continue;
+            if (systemPath is null || !File.Exists(systemPath)) continue;
             var pboPath = ConvertPBORefPath2PBOPath(SanitizePBOPath(modelPath));
             Logger.Info("Parsing P3D: {sysPath}", systemPath);
             var p3dFile = new P3DFile(pboPath, pboRefPath, systemPath);
             _models.Add(p3dFile);
             foreach (var texturePath in p3dFile.TexturePaths.Where(texturePath => !foundPaths.Contains(texturePath))) foundPaths.Add(texturePath);
-            foreach (var rvmatPath in p3dFile.MaterialPaths) {
-                if(!foundPaths.Contains(rvmatPath)) foundPaths.Add(rvmatPath);
-                if(!_foundRvMatPaths.Contains(rvmatPath)) _foundRvMatPaths.Add(rvmatPath);
+            foreach (var rvmatPath in p3dFile.MaterialPaths)
+            {
+                if (!foundPaths.Contains(rvmatPath)) foundPaths.Add(rvmatPath);
+                if (!_foundRvMatPaths.Contains(rvmatPath)) _foundRvMatPaths.Add(rvmatPath);
             }
             foreach (var surfacePath in p3dFile.SurfacePaths.Where(surfacePath => !foundPaths.Contains(surfacePath))) foundPaths.Add(surfacePath);
 
         }
         
-        foreach (var rvMatPath in _foundRvMatPaths) {
+
+        if (Statics.settings.P3D)        
+        foreach (var rvMatPath in _foundRvMatPaths)
+        {
             var pboRefPath = SanitizePBOPath(rvMatPath);
             var systemPath = ConvertPBORefPath2SystemPath(pboRefPath);
-            if(systemPath is null || !File.Exists(systemPath)) continue;
+            if (systemPath is null || !File.Exists(systemPath)) continue;
             var pboPath = ConvertPBORefPath2PBOPath(SanitizePBOPath(rvMatPath));
             Logger.Info("Parsing RVMat: {sysPath}", systemPath);
             var rvmat = new RvMatFile(pboPath, pboRefPath, systemPath);
             _materials.Add(rvmat);
             foundPaths.AddRange(rvmat.TexturePaths);
         }
+        
 
         foreach (var samplePath in _foundSamplePaths) {
             var sanitizedRefPath = SanitizePBOPath(samplePath);
@@ -205,18 +213,21 @@ public class AddonPacker {
              _obfuscatedPaths.TryAdd(foundPath, obfuscatedPBORefPath);
             obfuscatedPBORefPath = string.Empty;
         }
-        
 
-        foreach (var p3DFile in _models) {
-            foreach (var proxyPath in p3DFile.ProxyPaths) {
-                if(proxyPath.ToLower().StartsWith("dz")) continue;
+        if (Statics.settings.P3D)        
+        foreach (var p3DFile in _models)
+        {
+            foreach (var proxyPath in p3DFile.ProxyPaths)
+            {
+                if (proxyPath.ToLower().StartsWith("dz")) continue;
                 var sanitizedRefPath = SanitizePBOPath(Path.ChangeExtension(proxyPath, ".p3d"));
                 var proxySysPath = ConvertPBORefPath2SystemPath(sanitizedRefPath);
-                if(proxySysPath is null || !File.Exists(proxySysPath)) continue;
+                if (proxySysPath is null || !File.Exists(proxySysPath)) continue;
                 Logger.Info("Located proxy for {p}", p3DFile.PBOPath);
-                if (!_obfuscatedPaths.TryGetValue(sanitizedRefPath, out var obfuscatedPBORefPath)) {
+                if (!_obfuscatedPaths.TryGetValue(sanitizedRefPath, out var obfuscatedPBORefPath))
+                {
                     obfuscatedPBORefPath = DeterminePrefixFromPath(sanitizedRefPath).PrefixName + Path.DirectorySeparatorChar + PBOUtilities.RandomString(25, includeSpaces: true, includeNumbers: false) +
-                                           '.' + sanitizedRefPath.Split('.').Last();
+                                            '.' + sanitizedRefPath.Split('.').Last();
                 }
 
                 _obfuscatedPaths.TryAdd(proxyPath, obfuscatedPBORefPath);
@@ -227,12 +238,16 @@ public class AddonPacker {
         }
         
         
-        foreach (var mat in _materials) {
+        if (Statics.settings.RVMat)        
+        foreach (var mat in _materials)
+        {
             Logger.Info("Obfuscating RVMAT: {pboFile}", mat.PBOPath);
             foreach (var foundPath in mat.TexturePaths.Where(foundPath => _obfuscatedPaths.ContainsKey(foundPath))) mat.ObfuscatedPaths.Add(foundPath, _obfuscatedPaths[foundPath]);
             mat.ObfuscatePaths(ConvertPBORefPath2PBOPath(_obfuscatedPaths[mat.PBOReferencePath]), _obfuscatedPaths[mat.PBOReferencePath]);
         }
+        
 
+        if (Statics.settings.Config)
         foreach (var cfg in _configs) {
             Logger.Info("Obfuscating config: {pboFile}", cfg.PBOPath);
 
@@ -240,6 +255,7 @@ public class AddonPacker {
             cfg.ObfuscatePaths(PBOUtilities.RandomString(25, includeSpaces: true, includeNumbers: false) + Path.DirectorySeparatorChar + "config.cpp");
         }
 
+        if (Statics.settings.P3D)
         foreach (var model in _models) {
             Logger.Info("Obfuscating P3D: {pboFile}", model.PBOPath);
             foreach (var foundPath in model.FoundPaths.Where(foundPath => _obfuscatedPaths.ContainsKey(foundPath))) {

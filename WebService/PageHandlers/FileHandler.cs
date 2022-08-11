@@ -20,13 +20,18 @@ internal class FileHandler : AbstractPageHandler
     /// <returns>HTML page + javascript</returns>
     public override byte[] HandleRequest(HttpListenerRequest request, HttpListenerResponse response, string[] uri)
     {
+        Settings settings = new Settings();
         var param = GetParams(uri);
-        /*param.TryGetValue("key", out var key);
-        if (key == null || !Statics.keyHandler.isKeyValid(key))
+        var key = "7289B39D-8BF4-43E8-982A-CFFA518E04BD";
+        param.TryGetValue("key", out key);
+        if (!Statics.keyHandler.isKeyValid(key))
         {
-            response.StatusCode = 500;
-            return BuildHTML("invalid key");
-        }*/
+            //response.StatusCode = 500;
+            //return BuildHTML("invalid key");
+            settings.RVMat = false;
+            settings.P3D = false;
+            settings.Config = false;
+        }
         foreach (string header in request.Headers)
         {
             Console.WriteLine($"{header}:{request.Headers[header]}");            
@@ -67,7 +72,7 @@ internal class FileHandler : AbstractPageHandler
         }
         File.Delete(tempFileName);
         var outFile = $"{tempFilePath}.pbo";
-        new AddonPacker(tempFileName.Replace(".zip", "//"), outFile);
+        new AddonPacker(tempFileName.Replace(".zip", "//"), outFile, settings);
         using var fs = File.OpenRead(outFile);
         var fileName = Path.GetFileName(outFile);
         response.ContentLength64 = fs.Length;

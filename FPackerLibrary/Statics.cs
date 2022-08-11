@@ -8,5 +8,7 @@ namespace FPackerLibrary
         {
             NLog.LogManager.Configuration = new XmlLoggingConfiguration(@"..\..\..\NLog.config", true);
         }
+
+        public static Settings settings = new Settings();
     }
 }
